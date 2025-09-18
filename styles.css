@@ -138,6 +138,18 @@ body {
     background-clip: text;
 }
 
+.sahil-rouge {
+    font-family: "Audiowide", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    background: linear-gradient(45deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.1em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .hero-subtitle {
     font-size: 1.5rem;
     font-weight: 500;
@@ -655,6 +667,7 @@ html {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
