@@ -84,7 +84,7 @@ const projects = [
 ];
 
 // DOM Content Loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
 });
 
@@ -123,7 +123,7 @@ function setupNavigation() {
 function updateActiveNavLink() {
     const sections = document.querySelectorAll('section');
     const navLinks = document.querySelectorAll('.nav-link');
-    
+
     let current = '';
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
@@ -145,7 +145,7 @@ function updateActiveNavLink() {
 function loadProjects() {
     const projectsContainer = document.getElementById('projects-container');
     const featuredProjects = projects.filter(project => project.featured);
-    
+
     projectsContainer.innerHTML = featuredProjects.map(project => createProjectCard(project)).join('');
 }
 
@@ -177,15 +177,15 @@ function createProjectCard(project) {
 // Contact form functionality
 function setupContactForm() {
     const contactForm = document.getElementById('contact-form');
-    
-    contactForm.addEventListener('submit', function(e) {
+
+    contactForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        
+
         const formData = new FormData(contactForm);
         const name = formData.get('name');
         const email = formData.get('email');
         const message = formData.get('message');
-        
+
         // Simulate form submission
         showFormMessage('Thank you for your message! I\'ll get back to you soon.', 'success');
         contactForm.reset();
@@ -197,7 +197,7 @@ function showFormMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `form-message ${type}`;
     messageDiv.textContent = message;
-    
+
     // Style the message
     messageDiv.style.cssText = `
         padding: 1rem;
@@ -205,16 +205,16 @@ function showFormMessage(message, type) {
         border-radius: 8px;
         font-weight: 500;
         text-align: center;
-        ${type === 'success' ? 
-            'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;' : 
+        ${type === 'success' ?
+            'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;' :
             'background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;'
         }
     `;
-    
+
     // Insert message
     const contactForm = document.getElementById('contact-form');
     contactForm.appendChild(messageDiv);
-    
+
     // Remove message after 5 seconds
     setTimeout(() => {
         messageDiv.remove();
@@ -280,9 +280,9 @@ window.addEventListener('load', () => {
 window.addEventListener('scroll', debounce(() => {
     const navbar = document.querySelector('.navbar');
     if (window.scrollY > 100) {
-        navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+        navbar.style.background = 'rgba(10, 25, 47, 0.98)';
     } else {
-        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+        navbar.style.background = 'rgba(10, 25, 47, 0.9)';
     }
 }, 10));
 
@@ -290,19 +290,19 @@ window.addEventListener('scroll', debounce(() => {
 function initTypingAnimation() {
     const texts = [
         "Full Stack Developer",
-        "Game Developer", 
+        "Game Developer",
         "Problem Solver",
         "Tech Enthusiast"
     ];
-    
+
     const subtitleElement = document.querySelector('.hero-subtitle');
     let textIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
-    
+
     function typeText() {
         const currentText = texts[textIndex];
-        
+
         if (isDeleting) {
             subtitleElement.textContent = currentText.substring(0, charIndex - 1);
             charIndex--;
@@ -310,9 +310,9 @@ function initTypingAnimation() {
             subtitleElement.textContent = currentText.substring(0, charIndex + 1);
             charIndex++;
         }
-        
+
         let typeSpeed = isDeleting ? 50 : 100;
-        
+
         if (!isDeleting && charIndex === currentText.length) {
             typeSpeed = 2000;
             isDeleting = true;
@@ -321,10 +321,10 @@ function initTypingAnimation() {
             textIndex = (textIndex + 1) % texts.length;
             typeSpeed = 500;
         }
-        
+
         setTimeout(typeText, typeSpeed);
     }
-    
+
     // Start typing animation after a delay
     setTimeout(typeText, 1000);
 }
@@ -347,9 +347,9 @@ function createParticles() {
         pointer-events: none;
         z-index: 1;
     `;
-    
+
     document.querySelector('.hero').appendChild(particlesContainer);
-    
+
     for (let i = 0; i < 50; i++) {
         const particle = document.createElement('div');
         particle.style.cssText = `
@@ -376,8 +376,9 @@ style.textContent = `
     }
     
     .nav-link.active {
-        color: var(--primary-color);
+        color: var(--accent-color);
         position: relative;
+        text-shadow: var(--glow-red);
     }
     
     .nav-link.active::after {
@@ -387,8 +388,9 @@ style.textContent = `
         left: 0;
         width: 100%;
         height: 2px;
-        background: var(--primary-color);
+        background: var(--accent-color);
         border-radius: 1px;
+        box-shadow: var(--glow-red);
     }
 `;
 document.head.appendChild(style);
