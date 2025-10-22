@@ -31,6 +31,9 @@ body {
     color: var(--text-primary);
     background: var(--gradient);
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 .container {
@@ -624,21 +627,25 @@ section {
 
     .nav-menu {
         position: fixed;
-        left: -100%;
-        top: 70px;
+        left: 0;
+        top: -100vh;
         flex-direction: column;
-        background: rgba(10, 25, 47, 0.95);
+        background: rgba(10, 25, 47, 0.9);
         backdrop-filter: blur(15px);
-        border: 1px solid var(--accent-color);
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
         width: 100%;
         text-align: center;
-        transition: 0.3s;
-        box-shadow: var(--shadow);
+        transition: top 0.3s ease;
+        box-shadow: 0 2px 20px rgba(255, 0, 51, 0.1);
         padding: 2rem 0;
+        z-index: 999;
+        height: auto;
+        min-height: 200px;
     }
 
     .nav-menu.active {
-        left: 0;
+        top: 70px;
     }
 
     .nav-menu li {
@@ -658,6 +665,15 @@ section {
     .hero-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 1rem;
+    }
+
+    .hero-description {
+        border-left: none;
+        border-top: 3px solid var(--accent-green);
+        padding-left: 0;
+        padding-top: 1rem;
+        box-shadow: 0 -3px 10px rgba(0, 255, 65, 0.1);
     }
 
     .about-content {
@@ -688,6 +704,15 @@ section {
     .projects-grid {
         grid-template-columns: 1fr;
     }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .skill-category {
+        padding: 1.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -710,6 +735,42 @@ section {
 
     .btn {
         width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-container {
+        padding: 0 10px;
+        gap: 1.5rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+        padding-top: 0.75rem;
+    }
+
+    .nav-container {
+        padding: 1rem 15px;
+    }
+
+    .skill-category {
+        padding: 1rem;
+    }
+
+    .project-card {
+        margin-bottom: 1rem;
+    }
+
+    .contact-form {
+        padding: 1.5rem;
+    }
+
+    .about-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat {
+        padding: 1rem;
     }
 }
 
@@ -1118,4 +1179,57 @@ Coder Theme Enhancements */
 
 .syntax-function {
     color: #ffd700;
+}/
+* Fix for white bar on mobile */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--background);
+}
+
+/* Ensure all sections fill properly */
+section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix any potential white space issues */
+* {
+    box-sizing: border-box;
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 768px) {
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+        background: var(--background);
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+    
+    section {
+        width: 100%;
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+        width: 100%;
+        max-width: 100%;
+    }
 }
