@@ -397,3 +397,41 @@ document.head.appendChild(style);
 
 // Initialize particles on load
 window.addEventListener('load', createParticles);
+
+// Simple Custom Cursor Implementation
+document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize on desktop devices
+    if (window.matchMedia('(hover: hover)').matches) {
+        const cursor = document.createElement('div');
+        cursor.className = 'custom-cursor';
+        document.body.appendChild(cursor);
+
+        // Update cursor position
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Click effect
+        document.addEventListener('mousedown', () => {
+            cursor.classList.add('click');
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.classList.remove('click');
+        });
+
+        // Hover effects for interactive elements
+        const interactiveElements = document.querySelectorAll('a, button, .btn, .nav-link, .social-link, .project-card');
+        
+        interactiveElements.forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.classList.add('hover');
+            });
+
+            element.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hover');
+            });
+        });
+    }
+});
