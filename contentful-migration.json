@@ -1,0 +1,287 @@
+{
+  "name": "Blog & Case Studies Content Types",
+  "description": "Creates Article and CaseStudy content types for the portfolio blog",
+  "contentTypes": [
+    {
+      "name": "Article",
+      "description": "Blog post or technical article",
+      "displayField": "title",
+      "fields": [
+        {
+          "id": "title",
+          "name": "Title",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "size": {
+                "max": 200
+              }
+            }
+          ]
+        },
+        {
+          "id": "slug",
+          "name": "Slug",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            },
+            {
+              "regexp": {
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            }
+          ]
+        },
+        {
+          "id": "publishDate",
+          "name": "Publish Date",
+          "type": "Date",
+          "localized": false,
+          "required": false
+        },
+        {
+          "id": "excerpt",
+          "name": "Excerpt",
+          "type": "Symbol",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "size": {
+                "max": 300
+              }
+            }
+          ]
+        },
+        {
+          "id": "coverImage",
+          "name": "Cover Image",
+          "type": "Link",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "linkMimetypeGroup": [
+                "image"
+              ]
+            }
+          ],
+          "linkType": "Asset"
+        },
+        {
+          "id": "body",
+          "name": "Body (Rich Text)",
+          "type": "RichText",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "enabledNodeTypes": [
+                "heading-1",
+                "heading-2",
+                "heading-3",
+                "heading-4",
+                "heading-5",
+                "heading-6",
+                "ordered-list",
+                "unordered-list",
+                "hr",
+                "blockquote",
+                "paragraph",
+                "embedded-entry-block",
+                "embedded-asset-block"
+              ]
+            },
+            {
+              "enabledMarks": [
+                "bold",
+                "italic",
+                "underline",
+                "code",
+                "superscript",
+                "subscript"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tags",
+          "name": "Tags",
+          "type": "Array",
+          "localized": false,
+          "required": false,
+          "items": {
+            "type": "Symbol"
+          }
+        },
+        {
+          "id": "featured",
+          "name": "Featured",
+          "type": "Boolean",
+          "localized": false,
+          "required": false,
+          "defaultValue": {
+            "en-US": false
+          }
+        },
+        {
+          "id": "seoDescription",
+          "name": "SEO Description",
+          "type": "Symbol",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "size": {
+                "max": 160
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Case Study",
+      "description": "Long-form project case study with outcomes and metrics",
+      "displayField": "title",
+      "fields": [
+        {
+          "id": "title",
+          "name": "Title",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "size": {
+                "max": 200
+              }
+            }
+          ]
+        },
+        {
+          "id": "slug",
+          "name": "Slug",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            },
+            {
+              "regexp": {
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            }
+          ]
+        },
+        {
+          "id": "publishDate",
+          "name": "Publish Date",
+          "type": "Date",
+          "localized": false,
+          "required": false
+        },
+        {
+          "id": "excerpt",
+          "name": "Excerpt",
+          "type": "Symbol",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "size": {
+                "max": 300
+              }
+            }
+          ]
+        },
+        {
+          "id": "coverImage",
+          "name": "Cover Image",
+          "type": "Link",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "linkMimetypeGroup": [
+                "image"
+              ]
+            }
+          ],
+          "linkType": "Asset"
+        },
+        {
+          "id": "body",
+          "name": "Body (Rich Text)",
+          "type": "RichText",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "enabledNodeTypes": [
+                "heading-1",
+                "heading-2",
+                "heading-3",
+                "heading-4",
+                "heading-5",
+                "heading-6",
+                "ordered-list",
+                "unordered-list",
+                "hr",
+                "blockquote",
+                "paragraph",
+                "embedded-entry-block",
+                "embedded-asset-block"
+              ]
+            },
+            {
+              "enabledMarks": [
+                "bold",
+                "italic",
+                "underline",
+                "code",
+                "superscript",
+                "subscript"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "metrics",
+          "name": "Metrics (JSON)",
+          "type": "Object",
+          "localized": false,
+          "required": false,
+          "validations": []
+        },
+        {
+          "id": "techStack",
+          "name": "Tech Stack",
+          "type": "Array",
+          "localized": false,
+          "required": false,
+          "items": {
+            "type": "Symbol"
+          }
+        },
+        {
+          "id": "ctaLinks",
+          "name": "Call-to-Action Links (JSON Array)",
+          "type": "Object",
+          "localized": false,
+          "required": false,
+          "validations": []
+        }
+      ]
+    }
+  ],
+  "instructions": "1. Go to Contentful Settings → Content model (or via /content-models/)\n2. Click 'Create content type' and manually create these types using the 'Add new field' dialog for each field listed above.\n3. Alternatively, run the included Contentful CLI migration: `contentful space migration --space-id 84io6ov68x39 --environment-id master contentful-migration.js`.\n4. After creating, generate API docs or TypeScript types via Contentful UI if needed.\n5. Keep your Space ID and CDA token in contentful-config.js.\n6. Start writing articles!"
+}

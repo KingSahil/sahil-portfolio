@@ -899,6 +899,106 @@ section {
     border-color: rgba(255, 102, 132, 0.55);
 }
 
+/* Blog Section */
+.blog {
+    padding: 5rem 0;
+    background: var(--background);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.blog-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.post-tile {
+    background: linear-gradient(145deg, rgba(18, 24, 37, 0.6), rgba(8, 11, 18, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    position: relative;
+}
+
+.post-tile:hover {
+    border-color: rgba(255, 0, 51, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 0, 51, 0.15);
+    transform: translateY(-4px);
+}
+
+.post-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.post-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-meta {
+    color: var(--text-light);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+}
+
+.post-tile h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    color: #f8fbff;
+    line-height: 1.3;
+}
+
+.excerpt {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.read-more {
+    display: inline-block;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+}
+
+.read-more:hover {
+    text-shadow: var(--glow-red);
+    transform: translateX(4px);
+}
+
+.read-more-disabled {
+    color: var(--text-light);
+    cursor: default;
+}
+
+.read-more-disabled:hover {
+    text-shadow: none;
+    transform: none;
+}
+
+.post-tile.loading-card {
+    background: rgba(10, 25, 47, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+}
+
 /* Contact Section */
 .contact-content {
     display: grid;

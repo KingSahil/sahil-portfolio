@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+    <!-- Contentful CMS -->
+    <script src="https://cdn.jsdelivr.net/npm/contentful@9/dist/contentful.browser.min.js"></script>
+    <script src="contentful-config.js"></script>
 </head>
 
 <body>
@@ -35,6 +38,9 @@
                 </li>
                 <li class="nav-item">
                     <a href="#projects" class="nav-link">Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#blog" class="nav-link">Blog</a>
                 </li>
                 <li class="nav-item">
                     <a href="#contact" class="nav-link">Contact</a>
@@ -163,6 +169,21 @@
                 <a href="https://github.com/KingSahil" target="_blank" class="btn btn-primary">
                     View All Projects on GitHub
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="blog">
+        <div class="container">
+            <h2 class="section-title">Blog & Case Studies</h2>
+            <p class="section-intro">
+                Articles on building, learning, and shipping projects. Stories behind the code.
+            </p>
+            <div id="blog-list" class="blog-list">
+                <article class="post-tile loading-card">
+                    <h3>Loading articles...</h3>
+                </article>
             </div>
         </div>
     </section>

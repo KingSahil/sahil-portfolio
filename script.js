@@ -66,6 +66,98 @@ const PLAYGROUND_PINNED_TECH = [
 
 const MIN_SHOWCASE_REPO_SIZE = 25;
 
+async function initContentfulBlog() {
+    try {
+        const config = window.CONTENTFUL_CONFIG || {};
+        const { space, accessToken, environment = 'master' } = config;
+
+        if (!space || !accessToken || space === 'YOUR_SPACE_ID' || accessToken === 'YOUR_CDA_TOKEN') {
+            renderBlogList([]);
+            console.warn('Contentful is not configured. Add your Space ID and Content Delivery API token to contentful-config.js');
+            return;
+        }
+
+        if (!window.contentful || !window.contentful.createClient) {
+            console.warn('Contentful SDK not found. Add <script src="https://cdn.jsdelivr.net/npm/contentful@9/dist/contentful.browser.min.js"></script> to index.html');
+            return;
+        }
+
+        const client = window.contentful.createClient({
+            space,
+            accessToken,
+            environment
+        });
+
+        const contentTypes = await client.getContentTypes();
+        const availableTypes = new Set((contentTypes.items || []).map(type => type.sys?.id).filter(Boolean));
+
+        const [articles, caseStudies] = await Promise.all([
+            availableTypes.has('article')
+                ? client.getEntries({ content_type: 'article', order: '-sys.createdAt', limit: 50 })
+                : Promise.resolve({ items: [] }),
+            availableTypes.has('caseStudy')
+                ? client.getEntries({ content_type: 'caseStudy', order: '-sys.createdAt', limit: 50 })
+                : Promise.resolve({ items: [] })
+        ]);
+
+        const entries = [...(articles.items || []), ...(caseStudies.items || [])]
+            .sort((left, right) => {
+                const leftDate = left.fields?.publishDate || left.sys?.createdAt || '';
+                const rightDate = right.fields?.publishDate || right.sys?.createdAt || '';
+                return new Date(rightDate) - new Date(leftDate);
+            });
+
+        renderBlogList(entries);
+    } catch (err) {
+        console.error('Contentful error', err);
+        renderBlogList([]);
+    }
+}
+
+function renderBlogList(items) {
+    const container = document.getElementById('blog-list');
+    if (!container) return;
+
+    if (!items.length) {
+        container.innerHTML = '<p class="section-intro">No published articles yet. Add entries in Contentful and they will appear here.</p>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => {
+        const f = item.fields || {};
+        const slug = encodeURIComponent(f.slug || '');
+        const cover = f.coverImage && f.coverImage.fields && f.coverImage.fields.file && f.coverImage.fields.file.url ? `https:${f.coverImage.fields.file.url}` : '';
+        const excerpt = f.excerpt || 'New post from Contentful. Add an excerpt and slug to unlock the full article page.';
+        const contentType = item.sys?.contentType?.sys?.id === 'caseStudy' ? 'Case Study' : 'Article';
+        const publishLabel = formatContentfulDate(f.publishDate || item.sys?.createdAt);
+        const readLink = slug
+            ? `<a class="read-more" href="article.html?slug=${slug}&type=${encodeURIComponent(item.sys?.contentType?.sys?.id || 'article')}">Read →</a>`
+            : '<span class="read-more read-more-disabled">Add slug in Contentful</span>';
+
+        return `
+            <article class="post-tile">
+                ${cover ? `<img class="post-cover" src="${cover}" alt="${escapeHTML(f.title || '')}">` : ''}
+                <div class="post-content">
+                    <div class="post-meta">${escapeHTML(contentType)}${publishLabel ? ` · ${escapeHTML(publishLabel)}` : ''}</div>
+                    <h3>${escapeHTML(f.title || '')}</h3>
+                    <p class="excerpt">${escapeHTML(excerpt)}</p>
+                    ${readLink}
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+function formatContentfulDate(dateValue) {
+    if (!dateValue) return '';
+
+    return new Intl.DateTimeFormat('en', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    }).format(new Date(dateValue));
+}
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
@@ -79,6 +171,7 @@ async function initializeApp() {
     setupProjectsDragScroll();
     setupContactCardPressure();
     await loadGitHubContent();
+    await initContentfulBlog();
     setupScrollAnimations();
     setupSmoothScrolling();
 }

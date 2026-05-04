@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Article</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.css">
+  <style>
+    .article-page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 88px 24px 120px;
+    }
+
+    .article-page h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.12;
+      margin: 0 0 18px;
+      letter-spacing: 0;
+    }
+
+    .article-page .meta {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 42px;
+    }
+
+    .article-page .cover {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 28px 0 36px;
+    }
+
+    .article-body {
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+
+    .article-body p {
+      margin: 0 0 1.35rem;
+    }
+
+    .article-body h2,
+    .article-body h3 {
+      color: #f8fbff;
+      letter-spacing: 0;
+      line-height: 1.25;
+      margin: 3rem 0 1rem;
+    }
+
+    .article-body h2 {
+      font-size: 1.65rem;
+    }
+
+    .article-body h3 {
+      font-size: 1.35rem;
+    }
+
+    .article-body ul,
+    .article-body ol {
+      margin: 0 0 1.6rem 1.35rem;
+      padding: 0;
+    }
+
+    .article-body li {
+      margin: 0.35rem 0;
+      padding-left: 0.25rem;
+    }
+
+    .article-body blockquote {
+      border-left: 3px solid var(--accent-color);
+      color: var(--text-secondary);
+      margin: 2rem 0;
+      padding: 0.2rem 0 0.2rem 1.25rem;
+    }
+
+    .article-body img {
+      max-width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      .article-page {
+        padding: 64px 18px 88px;
+      }
+
+      .article-body {
+        font-size: 1rem;
+        line-height: 1.75;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="article-root">
+    <div id="article">Loading...</div>
+  </main>
+
+  <!-- Contentful + rich text renderer (browser builds) -->
+  <script src="https://cdn.jsdelivr.net/npm/contentful@9/dist/contentful.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+  <script src="contentful-config.js"></script>
+
+  <script>
+    function escapeHTML(value = '') {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    const renderOptions = {
+      renderNode: {
+        'embedded-asset-block': node => {
+          const f = node.data.target.fields || {};
+          const url = f.file && f.file.url ? `https:${f.file.url}` : '';
+          const title = escapeHTML(f.title || '');
+          return `<figure><img src="${url}" alt="${title}"></figure>`;
+        },
+        'embedded-entry-block': (node) => {
+          const entry = node.data.target || {};
+          if (entry.sys && entry.sys.contentType && entry.sys.contentType.sys && entry.sys.contentType.sys.id === 'codeBlock') {
+            const code = entry.fields && entry.fields.code ? entry.fields.code : '';
+            const lang = entry.fields && entry.fields.language ? entry.fields.language : 'language-js';
+            return `<pre><code class="${escapeHTML(lang)}">${escapeHTML(code)}</code></pre>`;
+          }
+          return '';
+        }
+      },
+      renderMark: {
+        'code': text => `<code>${escapeHTML(text)}</code>`
+      }
+    };
+
+    function escapeTextWithBreaks(value = '') {
+      return escapeHTML(value).replace(/\n/g, '<br>');
+    }
+
+    function isHeadingText(value = '') {
+      const text = value.trim();
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      const hasSentencePunctuation = /[.!?]$/.test(text);
+      const titleCaseWords = text.split(/\s+/).filter(word => /^[A-Z0-9]/.test(word)).length;
+
+      return wordCount > 1 && wordCount <= 7 && !hasSentencePunctuation && titleCaseWords >= Math.ceil(wordCount * 0.65);
+    }
+
+    function renderLooseTextBlock(block = '') {
+      const text = block.trim();
+      const lines = text.split(/\n+/).map(line => line.trim()).filter(Boolean);
+
+      if (!text) return '';
+      if (isHeadingText(text)) return `<h2>${escapeHTML(text)}</h2>`;
+      if (lines.length > 1 && lines.every(line => /^-\s+/.test(line))) {
+        return `<ul>${lines.map(line => `<li>${escapeHTML(line.replace(/^-\s+/, ''))}</li>`).join('')}</ul>`;
+      }
+      if (lines.length > 1 && lines.every(line => /^\d+\.\s+/.test(line))) {
+        return `<ol>${lines.map(line => `<li>${escapeHTML(line.replace(/^\d+\.\s+/, ''))}</li>`).join('')}</ol>`;
+      }
+
+      return `<p>${escapeTextWithBreaks(text)}</p>`;
+    }
+
+    function renderParagraphNode(node) {
+      const content = node.content || [];
+      const isPlainParagraph = content.every(child => child.nodeType === 'text' && (!child.marks || !child.marks.length));
+      const text = content.map(child => child.value || '').join('');
+
+      if (isPlainParagraph && /\n\s*\n/.test(text)) {
+        return text.split(/\n\s*\n/).map(renderLooseTextBlock).join('');
+      }
+
+      return `<p>${content.map(renderRichTextNode).join('')}</p>`;
+    }
+
+    function renderRichTextNode(node) {
+      if (!node) return '';
+
+      if (node.nodeType === 'text') {
+        const marks = node.marks || [];
+        return marks.reduce((html, mark) => {
+          if (mark.type === 'bold') return `<strong>${html}</strong>`;
+          if (mark.type === 'italic') return `<em>${html}</em>`;
+          if (mark.type === 'underline') return `<u>${html}</u>`;
+          if (mark.type === 'code') return renderOptions.renderMark.code(node.value || '');
+          return html;
+        }, escapeHTML(node.value || ''));
+      }
+
+      if (renderOptions.renderNode[node.nodeType]) {
+        return renderOptions.renderNode[node.nodeType](node);
+      }
+
+      const children = (node.content || []).map(renderRichTextNode).join('');
+      const renderers = {
+        document: () => children,
+        paragraph: () => renderParagraphNode(node),
+        'heading-1': () => `<h1>${children}</h1>`,
+        'heading-2': () => `<h2>${children}</h2>`,
+        'heading-3': () => `<h3>${children}</h3>`,
+        'heading-4': () => `<h4>${children}</h4>`,
+        'heading-5': () => `<h5>${children}</h5>`,
+        'heading-6': () => `<h6>${children}</h6>`,
+        'unordered-list': () => `<ul>${children}</ul>`,
+        'ordered-list': () => `<ol>${children}</ol>`,
+        'list-item': () => `<li>${children}</li>`,
+        blockquote: () => `<blockquote>${children}</blockquote>`,
+        hr: () => '<hr>',
+        hyperlink: () => `<a href="${escapeHTML(node.data?.uri || '#')}" target="_blank" rel="noopener noreferrer">${children}</a>`
+      };
+
+      return renderers[node.nodeType] ? renderers[node.nodeType]() : children;
+    }
+
+    function documentToHtmlString(document) {
+      return renderRichTextNode(document);
+    }
+
+    function getQueryParam(name) {
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    async function loadArticleBySlug(slug) {
+      try {
+        if (!window.contentful || !window.contentful.createClient) {
+          document.getElementById('article').innerHTML = '<p>Contentful SDK not loaded.</p>';
+          return;
+        }
+
+        const config = window.CONTENTFUL_CONFIG || {};
+        const { space, accessToken, environment = 'master' } = config;
+
+        if (!space || !accessToken) {
+          document.getElementById('article').innerHTML = '<p>Contentful is not configured.</p>';
+          return;
+        }
+
+        const type = getQueryParam('type') || 'article';
+        const client = window.contentful.createClient({ space, accessToken, environment });
+        const res = await client.getEntries({ content_type: type, 'fields.slug': slug, limit: 1 });
+        if (!res.items || !res.items.length) {
+          document.getElementById('article').innerHTML = '<p>Article not found.</p>';
+          return;
+        }
+
+        const a = res.items[0].fields || {};
+        const html = a.body ? documentToHtmlString(a.body, renderOptions) : '<p>No content.</p>';
+        const publishDate = a.publishDate ? new Date(a.publishDate).toLocaleDateString() : '';
+
+        document.getElementById('article').innerHTML = `
+          <article class="article-page">
+            <h1>${escapeHTML(a.title || '')}</h1>
+            ${a.coverImage && a.coverImage.fields && a.coverImage.fields.file && a.coverImage.fields.file.url ? `<img class="cover" src="https:${a.coverImage.fields.file.url}" alt="${escapeHTML(a.title || '')}">` : ''}
+            ${publishDate ? `<div class="meta">Published ${escapeHTML(publishDate)}</div>` : ''}
+            <div class="article-body">${html}</div>
+          </article>
+        `;
+
+        // Prism highlight
+        window.requestAnimationFrame(() => { if (window.Prism) window.Prism.highlightAll(); });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('article').innerHTML = '<p>Failed to load article.</p>';
+      }
+    }
+
+    const slug = getQueryParam('slug');
+    if (slug) {
+      loadArticleBySlug(slug);
+    } else {
+      document.getElementById('article').innerHTML = '<p>No slug specified. Open this page as article.html?slug=your-article-slug</p>';
+    }
+
+    function initCustomCursor() {
+      if (!window.matchMedia('(hover: hover)').matches || document.querySelector('.custom-cursor')) {
+        return;
+      }
+
+      const cursor = document.createElement('div');
+      cursor.className = 'custom-cursor';
+      document.body.appendChild(cursor);
+
+      document.addEventListener('mousemove', (event) => {
+        cursor.style.left = `${event.clientX}px`;
+        cursor.style.top = `${event.clientY}px`;
+      });
+
+      document.addEventListener('mousedown', () => {
+        cursor.classList.add('click');
+      });
+
+      document.addEventListener('mouseup', () => {
+        cursor.classList.remove('click');
+      });
+
+      document.addEventListener('mouseover', (event) => {
+        if (event.target.closest('a, button, .btn, code, pre')) {
+          cursor.classList.add('hover');
+        }
+      });
+
+      document.addEventListener('mouseout', (event) => {
+        const leftInteractive = event.target.closest('a, button, .btn, code, pre');
+        const enteredInteractive = event.relatedTarget && event.relatedTarget.closest && event.relatedTarget.closest('a, button, .btn, code, pre');
+
+        if (leftInteractive && !enteredInteractive) {
+          cursor.classList.remove('hover');
+        }
+      });
+    }
+
+    initCustomCursor();
+  </script>
+</body>
+</html>
