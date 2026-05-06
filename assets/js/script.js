@@ -73,7 +73,7 @@ async function initContentfulBlog() {
 
         if (!space || !accessToken || space === 'YOUR_SPACE_ID' || accessToken === 'YOUR_CDA_TOKEN') {
             renderBlogList([]);
-            console.warn('Contentful is not configured. Add your Space ID and Content Delivery API token to contentful-config.js');
+            console.warn('Contentful is not configured. Add your Space ID and Content Delivery API token to config/contentful-config.js');
             return;
         }
 

@@ -5,10 +5,10 @@ This guide walks you through setting up the Contentful CMS integration for your 
 ## Files Added
 
 - `article.html` — Individual article/case study template (loads article by `?slug=` query param)
-- `script.js` — Updated with `initContentfulBlog()` and `renderBlogList()` functions
+- `assets/js/script.js` — Updated with `initContentfulBlog()` and `renderBlogList()` functions
 - `index.html` — Added blog section between projects and contact, plus Contentful CDN script and nav link
-- `styles.css` — Added `.blog`, `.post-tile`, `.read-more` styling
-- `contentful-migration.json` — Reference file listing Article and CaseStudy content type fields
+- `assets/css/styles.css` — Added `.blog`, `.post-tile`, `.read-more` styling
+- `config/contentful-migration.json` — Reference file listing Article and CaseStudy content type fields
 
 ## Quick Setup (5 minutes)
 
@@ -50,7 +50,7 @@ Visit [Contentful](https://contentful.com) and create a **free account** if you 
 
 Replace placeholders in two files:
 
-**`contentful-config.js`**:
+**`config/contentful-config.js`**:
 ```javascript
 window.CONTENTFUL_CONFIG = {
     space: 'YOUR_SPACE_ID',
@@ -59,14 +59,14 @@ window.CONTENTFUL_CONFIG = {
 };
 ```
 
-Your current `contentful-config.js` is already filled with the live Space ID and Content Delivery API token.
+Your current `config/contentful-config.js` is already filled with the live Space ID and Content Delivery API token.
 
 ### Optional: Run the Migration
 
 Your Contentful space currently has the `Article` content type, but it may still need the remaining blog fields. If you have the Contentful CLI installed and are logged in, run:
 
 ```bash
-contentful space migration --space-id 84io6ov68x39 --environment-id master contentful-migration.js
+contentful space migration --space-id 84io6ov68x39 --environment-id master config/contentful-migration.js
 ```
 
 This adds the missing `Article` fields and creates the `Case Study` content type.
@@ -150,18 +150,18 @@ To support multiple languages:
 
 | File | Purpose |
 |------|---------|
-| `script.js` | Contentful client init, blog fetching & rendering |
+| `assets/js/script.js` | Contentful client init, blog fetching & rendering |
 | `article.html` | Individual article template with rich text + code highlighting |
 | `index.html` | Blog section HTML + navigation link |
-| `styles.css` | `.blog`, `.post-tile`, `.read-more` styles |
-| `contentful-config.js` | Shared Space ID, CDA token, and environment |
-| `contentful-migration.json` | Reference schema (manual setup guide) |
-| `contentful-migration.js` | Runnable Contentful CLI migration |
+| `assets/css/styles.css` | `.blog`, `.post-tile`, `.read-more` styles |
+| `config/contentful-config.js` | Shared Space ID, CDA token, and environment |
+| `config/contentful-migration.json` | Reference schema (manual setup guide) |
+| `config/contentful-migration.js` | Runnable Contentful CLI migration |
 
 ## Next Steps
 
 - Write 3–5 articles to populate your blog
-- Customize CSS (colors, grid layout) in `styles.css` if desired
+- Customize CSS (colors, grid layout) in `assets/css/styles.css` if desired
 - Add a search feature or filter by tags
 - Set up webhooks for auto-rebuild on publish
 - Consider migrating GitHub readmes or project docs into case studies

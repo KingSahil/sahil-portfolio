@@ -21,8 +21,14 @@ Open `index.html` in your browser to see your portfolio in action!
 ```
 sahil portfolio/
 ├── index.html          # Main HTML file
-├── styles.css          # CSS styles and responsive design
-├── script.js           # JavaScript functionality
+├── article.html        # Blog article template
+├── assets/
+│   ├── css/styles.css  # CSS styles and responsive design
+│   ├── js/script.js    # JavaScript functionality
+│   ├── images/         # Portfolio images and hover illustrations
+│   └── resume/         # Resume PDF
+├── config/             # Contentful config and migration files
+├── docs/               # Setup notes and guides
 └── README.md           # This file
 ```
 
@@ -68,7 +74,7 @@ Edit the following in `index.html`:
 - Contact information
 
 ### Add New Projects
-Edit the `projects` array in `script.js`:
+Edit the `projects` array in `assets/js/script.js`:
 ```javascript
 const projects = [
     {
@@ -84,7 +90,7 @@ const projects = [
 ```
 
 ### Modify Styling
-Edit `styles.css` to:
+Edit `assets/css/styles.css` to:
 - Change color scheme (update CSS variables in `:root`)
 - Modify fonts and typography
 - Adjust spacing and layout

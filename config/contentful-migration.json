@@ -283,5 +283,5 @@
       ]
     }
   ],
-  "instructions": "1. Go to Contentful Settings → Content model (or via /content-models/)\n2. Click 'Create content type' and manually create these types using the 'Add new field' dialog for each field listed above.\n3. Alternatively, run the included Contentful CLI migration: `contentful space migration --space-id 84io6ov68x39 --environment-id master contentful-migration.js`.\n4. After creating, generate API docs or TypeScript types via Contentful UI if needed.\n5. Keep your Space ID and CDA token in contentful-config.js.\n6. Start writing articles!"
+  "instructions": "1. Go to Contentful Settings → Content model (or via /content-models/)\n2. Click 'Create content type' and manually create these types using the 'Add new field' dialog for each field listed above.\n3. Alternatively, run the included Contentful CLI migration: `contentful space migration --space-id 84io6ov68x39 --environment-id master config/contentful-migration.js`.\n4. After creating, generate API docs or TypeScript types via Contentful UI if needed.\n5. Keep your Space ID and CDA token in config/contentful-config.js.\n6. Start writing articles!"
 }

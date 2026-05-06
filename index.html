@@ -7,7 +7,7 @@
     <title>Sahil - Full Stack Developer</title>
     <meta name="description"
         content="Sahil's portfolio featuring live GitHub projects, current skills, and social links across LinkedIn, Instagram, X, and GitHub.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <!-- Contentful CMS -->
     <script src="https://cdn.jsdelivr.net/npm/contentful@9/dist/contentful.browser.min.js"></script>
-    <script src="contentful-config.js"></script>
+    <script src="config/contentful-config.js"></script>
 </head>
 
 <body>
@@ -66,6 +66,10 @@
                 </p>
                 <div class="hero-buttons">
                     <a href="#projects" class="btn btn-primary">View Projects</a>
+                    <a href="assets/resume/resume.pdf" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-file-lines"></i>
+                        Check Out Resume
+                    </a>
                     <a href="#contact" class="btn btn-secondary">Find Me Online</a>
                 </div>
                 <div class="hero-social">
@@ -102,16 +106,16 @@
                 <div class="about-text">
                     <p>
                         I'm a
-                        <span class="hover-preview-target" data-preview-image="images/hover/coding-man.svg" data-preview-alt="Coding man illustration">full-stack developer</span>
+                        <span class="hover-preview-target" data-preview-image="assets/images/hover/coding-man.svg" data-preview-alt="Coding man illustration">full-stack developer</span>
                         from Amritsar, India, focused on building useful digital products
                         with clean UI,
-                        <span class="hover-preview-target" data-preview-image="images/hover/automation-bot.svg" data-preview-alt="Automation bot illustration">practical automation</span>,
+                        <span class="hover-preview-target" data-preview-image="assets/images/hover/automation-bot.svg" data-preview-alt="Automation bot illustration">practical automation</span>,
                         and strong problem solving.
                     </p>
                     <p>
                         My recent work spans vocabulary tools, clipboard utilities, student platforms,
                         landing pages, and
-                        <span class="hover-preview-target" data-preview-image="images/hover/creative-coder.svg" data-preview-alt="Creative coder illustration">creative experiments</span>
+                        <span class="hover-preview-target" data-preview-image="assets/images/hover/creative-coder.svg" data-preview-alt="Creative coder illustration">creative experiments</span>
                         in Python, JavaScript, TypeScript, and Godot.
                     </p>
                     <p>
@@ -127,7 +131,7 @@
                         </p>
                     </div>
                     <figure class="punjab-image-wrap pressure-card">
-                        <img class="punjab-image" src="punjab.png" alt="Silhouette map of Punjab">
+                        <img class="punjab-image" src="assets/images/punjab.png" alt="Silhouette map of Punjab">
                     </figure>
                 </div>
             </div>
@@ -208,6 +212,10 @@
                             <i class="fab fa-github"></i>
                             <a href="https://github.com/KingSahil" target="_blank">github.com/KingSahil</a>
                         </div>
+                        <div class="contact-item">
+                            <i class="fas fa-file-lines"></i>
+                            <a href="assets/resume/resume.pdf" target="_blank" rel="noopener noreferrer">Check out my resume</a>
+                        </div>
                     </div>
                 </div>
                 <div class="contact-panel social-panel">
@@ -251,7 +259,7 @@
         </div>
     </section>
 
-    <script src="script.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 
 </html>
