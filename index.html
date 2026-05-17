@@ -7,6 +7,14 @@
     <title>Sahil - Full Stack Developer</title>
     <meta name="description"
         content="Sahil's portfolio featuring live GitHub projects, current skills, and social links across LinkedIn, Instagram, X, and GitHub.">
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('embed') === '1' || window.self !== window.top) {
+                document.documentElement.classList.add('is-embedded');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

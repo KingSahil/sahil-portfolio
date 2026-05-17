@@ -16,6 +16,32 @@ A modern, responsive portfolio website showcasing your projects from GitHub. Bui
 
 Open `index.html` in your browser to see your portfolio in action!
 
+## 🧩 Embed in Another Website
+
+Use the embed mode URL as your iframe source:
+
+```html
+<iframe
+  id="sahil-portfolio-frame"
+  src="https://your-domain.com/index.html?embed=1"
+  title="Sahil Portfolio"
+  style="width: 100%; height: 900px; border: 0;"
+  loading="lazy"
+></iframe>
+```
+
+The page also posts resize messages to the parent window:
+
+```javascript
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'sahil-portfolio:resize') {
+    document.querySelector('#sahil-portfolio-frame').style.height = `${event.data.height}px`;
+  }
+});
+```
+
+If you deploy to Netlify, Cloudflare Pages, or Vercel, this repo includes iframe-friendly `frame-ancestors` headers.
+
 ## 📁 Project Structure
 
 ```

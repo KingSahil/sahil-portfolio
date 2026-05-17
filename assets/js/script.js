@@ -1,4 +1,5 @@
 const GITHUB_USERNAME = 'KingSahil';
+const IS_EMBEDDED = window.self !== window.top || new URLSearchParams(window.location.search).get('embed') === '1';
 let projectsAutoScrollPaused = false;
 const FALLBACK_PROJECTS = [
     {
@@ -164,6 +165,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 async function initializeApp() {
+    if (IS_EMBEDDED) {
+        document.documentElement.classList.add('is-embedded');
+        setupEmbedMode();
+    }
+
     setupNavigation();
     updateCurrentYear();
     setupHoverImagePreviews();
@@ -1177,6 +1183,54 @@ function escapeHTML(value = '') {
         .replace(/'/g, '&#39;');
 }
 
+function setupEmbedMode() {
+    const retargetLinks = () => {
+        document.querySelectorAll('a[href]').forEach((link) => {
+            const href = link.getAttribute('href') || '';
+            if (href.startsWith('#')) {
+                return;
+            }
+
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        });
+    };
+
+    const sendHeight = () => {
+        const height = Math.ceil(Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight,
+            document.documentElement.offsetHeight,
+            document.body.offsetHeight
+        ));
+
+        window.parent.postMessage({
+            type: 'sahil-portfolio:resize',
+            height
+        }, '*');
+    };
+
+    retargetLinks();
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', debounce(sendHeight, 100));
+
+    if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(debounce(sendHeight, 100));
+        observer.observe(document.body);
+    }
+
+    const mutationObserver = new MutationObserver(() => {
+        retargetLinks();
+        sendHeight();
+    });
+    mutationObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    requestAnimationFrame(sendHeight);
+}
+
 // Smooth scrolling for anchor links
 function setupSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1328,6 +1382,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add particle background effect
 function createParticles() {
+    if (IS_EMBEDDED) {
+        return;
+    }
+
     const particlesContainer = document.createElement('div');
     particlesContainer.className = 'particles';
     particlesContainer.style.cssText = `
@@ -1392,6 +1450,10 @@ window.addEventListener('load', createParticles);
 
 // Simple Custom Cursor Implementation
 document.addEventListener('DOMContentLoaded', () => {
+    if (IS_EMBEDDED) {
+        return;
+    }
+
     // Only initialize on desktop devices
     if (window.matchMedia('(hover: hover)').matches) {
         const cursor = document.createElement('div');

@@ -1378,6 +1378,74 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Iframe embed mode. Use index.html?embed=1 as the iframe src. */
+html.is-embedded,
+html.is-embedded body {
+    min-height: 100%;
+    background: var(--background);
+}
+
+html.is-embedded body {
+    cursor: auto;
+}
+
+html.is-embedded *,
+html.is-embedded .btn,
+html.is-embedded .hamburger,
+html.is-embedded .stack-chip {
+    cursor: auto !important;
+}
+
+html.is-embedded .navbar,
+html.is-embedded .custom-cursor,
+html.is-embedded .particles {
+    display: none !important;
+}
+
+html.is-embedded .hero {
+    min-height: auto;
+    padding: 3rem 0 4rem;
+}
+
+html.is-embedded section {
+    padding: 3.5rem 0;
+}
+
+html.is-embedded .hero-container {
+    padding-top: 0;
+}
+
+html.is-embedded .hero-title {
+    font-size: clamp(2rem, 7vw, 3.5rem);
+}
+
+html.is-embedded .hero-subtitle {
+    font-size: clamp(1.05rem, 3vw, 1.5rem);
+}
+
+html.is-embedded .hero-buttons {
+    flex-wrap: wrap;
+}
+
+html.is-embedded .projects-marquee {
+    mask-image: none;
+    -webkit-mask-image: none;
+}
+
+@media (max-width: 720px) {
+    html.is-embedded .hero {
+        padding-top: 2rem;
+    }
+
+    html.is-embedded .hero-buttons {
+        flex-direction: column;
+    }
+
+    html.is-embedded .hero-buttons .btn {
+        width: 100%;
+    }
+}
+
 /* Loading Animation */
 @keyframes fadeInUp {
     from {
