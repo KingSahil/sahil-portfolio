@@ -1470,6 +1470,26 @@ section {
     .hover-preview-target {
         display: inline;
     }
+
+    .tech-playground-wrapper {
+        padding: 0.75rem 0.6rem;
+        margin-top: 1.5rem;
+    }
+
+    .tech-playground {
+        min-height: 320px;
+    }
+
+    .stack-chip {
+        padding: 0.32rem 0.62rem;
+        font-size: 0.76rem;
+        min-width: 58px;
+        gap: 0.28rem;
+    }
+
+    .stack-chip-icon {
+        font-size: 0.85rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1542,6 +1562,21 @@ section {
 
     .subtitle-separator {
         margin: 0 0.25rem;
+    }
+
+    .tech-playground {
+        min-height: 330px;
+    }
+
+    .stack-chip {
+        padding: 0.26rem 0.5rem;
+        font-size: 0.7rem;
+        min-width: 50px;
+        gap: 0.22rem;
+    }
+
+    .stack-chip-icon {
+        font-size: 0.78rem;
     }
 }
 

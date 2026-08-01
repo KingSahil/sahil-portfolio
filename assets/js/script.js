@@ -51,18 +51,18 @@ const LANGUAGE_GROUPS = {
 };
 
 const PLAYGROUND_PINNED_TECH = [
+    'Python',
+    'Rust',
+    'C++',
+    'JavaScript',
+    'TypeScript',
     'React',
-    'React Native',
     'Expo',
-    'n8n',
-    'Docker',
+    'Godot',
     'Next.js',
-    'Pandas',
-    'NumPy',
-    'FastAPI',
-    'Arduino',
-    'C',
-    'C++'
+    'Node.js',
+    'Docker',
+    'FastAPI'
 ];
 
 const MIN_SHOWCASE_REPO_SIZE = 25;
@@ -595,7 +595,7 @@ function renderTechPlayground(repositories, useFallback = false) {
         return;
     }
 
-    const techStack = extractTechStack(repositories, useFallback).slice(0, 18);
+    const techStack = [...PLAYGROUND_PINNED_TECH];
     playground.innerHTML = '';
 
     if (!techStack.length) {
@@ -631,6 +631,7 @@ function getTechIconClass(tech) {
         javascript: 'devicon-javascript-plain colored',
         typescript: 'devicon-typescript-plain colored',
         python: 'devicon-python-plain colored',
+        rust: 'devicon-rust-plain colored',
         pandas: 'fa-solid fa-table-columns',
         numpy: 'fa-solid fa-cubes',
         react: 'devicon-react-original colored',
@@ -785,19 +786,20 @@ function initializeTechPlaygroundPhysics(playground) {
         return;
     }
 
+    const isMobile = window.innerWidth <= 768;
     const bounds = () => ({ width: playground.clientWidth, height: playground.clientHeight });
     const box = bounds();
-    const padding = 14;
-    const minCellWidth = 132;
-    const minCellHeight = 52;
+    const padding = isMobile ? 6 : 14;
+    const minCellWidth = isMobile ? 68 : 132;
+    const minCellHeight = isMobile ? 32 : 52;
     const columns = Math.max(1, Math.floor((box.width - padding * 2) / minCellWidth));
     const rows = Math.max(1, Math.ceil(chips.length / columns));
     const cellWidth = Math.max(minCellWidth, (box.width - padding * 2) / columns);
     const cellHeight = Math.max(minCellHeight, (box.height - padding * 2) / rows);
 
     const states = chips.map((chip, index) => {
-        const chipWidth = Math.max(82, chip.offsetWidth || 110);
-        const chipHeight = Math.max(34, chip.offsetHeight || 38);
+        const chipWidth = Math.max(isMobile ? 44 : 82, chip.offsetWidth || (isMobile ? 60 : 110));
+        const chipHeight = Math.max(isMobile ? 20 : 34, chip.offsetHeight || (isMobile ? 24 : 38));
         const col = index % columns;
         const row = Math.floor(index / columns);
 
