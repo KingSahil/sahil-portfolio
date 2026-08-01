@@ -1223,6 +1223,12 @@ section {
         margin: 1rem 0;
     }
 
+    .hero {
+        padding-top: 6rem;
+        padding-bottom: 3rem;
+        min-height: auto;
+    }
+
     .hero-container {
         display: flex;
         flex-direction: column;
@@ -1232,7 +1238,7 @@ section {
         gap: 2rem;
         width: 100%;
         max-width: 100%;
-        padding: 0 16px;
+        padding: 0.5rem 16px 0 16px;
         box-sizing: border-box;
     }
 
@@ -1524,8 +1530,13 @@ section {
         font-size: 0.88rem;
     }
 
+    .hero {
+        padding-top: 6.5rem;
+        padding-bottom: 2.5rem;
+    }
+
     .hero-container {
-        padding: 0 10px;
+        padding: 0.5rem 10px 0 10px;
         gap: 1.25rem;
     }
 
