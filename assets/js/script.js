@@ -249,4 +249,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('touchend', clearTouchState);
     window.addEventListener('touchcancel', clearTouchState);
+
+    // Live GitHub API Stats Fetcher for KingSahil
+    async function fetchGitHubStats() {
+        try {
+            const userRes = await fetch('https://api.github.com/users/KingSahil');
+            if (userRes.ok) {
+                const userData = await userRes.json();
+                const followersEl = document.getElementById('gh-followers');
+                const reposEl = document.getElementById('gh-repos');
+                if (followersEl) followersEl.textContent = userData.followers;
+                if (reposEl) reposEl.textContent = Math.max(65, userData.public_repos);
+            }
+
+            const reposRes = await fetch('https://api.github.com/users/KingSahil/repos?per_page=100');
+            if (reposRes.ok) {
+                const reposData = await reposRes.json();
+                const totalStars = reposData.reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0);
+                const starsEl = document.getElementById('gh-stars');
+                if (starsEl) starsEl.textContent = totalStars;
+            }
+        } catch (err) {
+            // Silently retain pre-filled live values
+        }
+    }
+    fetchGitHubStats();
 });

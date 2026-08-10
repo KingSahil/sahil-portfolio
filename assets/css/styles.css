@@ -331,7 +331,16 @@ html, body {
 .hero-bio {
     font-size: 0.84rem;
     color: var(--text-secondary);
-    line-height: 1.45;
+    line-height: 1.5;
+}
+
+.handwritten-inline {
+    font-family: var(--font-handwrite);
+    font-size: 0.98rem;
+    color: #ffd700;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    transform: rotate(-2deg);
 }
 
 .hero-location {
