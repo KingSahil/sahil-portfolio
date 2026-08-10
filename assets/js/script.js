@@ -124,15 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.isDirty = true;
             },
 
-            activate(clientX, clientY, scale = 0.99, isTouch = false) {
+            activate(clientX, clientY, scale = 0.99) {
                 this.card.classList.add('is-touch-pressed');
                 this.targetScale = scale;
                 this.handleMove(clientX, clientY);
-
-                if (isTouch && lastVibratedCardEl !== this.card) {
-                    lastVibratedCardEl = this.card;
-                    triggerHaptic(40);
-                }
             },
 
             release() {
@@ -221,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('contextmenu', (e) => e.preventDefault());
         card.addEventListener('pointerdown', (e) => {
             if (e.pointerType === 'touch') {
-                triggerHaptic(40);
+                triggerHaptic(45);
             }
         });
 
@@ -251,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // High-Performance Touch Dragging (Zero Layout Reflow)
     window.addEventListener('touchstart', (e) => {
-        refreshSpatialIndex(); // Quick bounds sync on touch start
+        refreshSpatialIndex();
         const touch = e.touches[0];
         const touchX = touch.clientX;
         const touchY = touch.clientY;
@@ -260,13 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMatch) {
             currentActiveBtn = btnMatch.element;
             currentActiveBtn.classList.add('is-btn-active');
-            triggerHaptic(30);
+            triggerHaptic(35);
         }
 
         const cardMatch = findCardAtPoint(touchX, touchY);
         if (cardMatch) {
             currentActiveCardObj = cardMatch.controller;
-            currentActiveCardObj.activate(touchX, touchY, 0.99, true);
+            currentActiveCardObj.activate(touchX, touchY, 0.99);
+            lastVibratedCardEl = cardMatch.element;
+            triggerHaptic(45); // Instant haptic feedback as soon as card is touched!
         }
     }, { passive: true });
 
@@ -275,14 +272,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const touchX = touch.clientX;
         const touchY = touch.clientY;
 
-        // Button spatial check (Pure arithmetic)
+        // Button spatial check
         const btnMatch = findBtnAtPoint(touchX, touchY);
         if (btnMatch) {
             if (currentActiveBtn !== btnMatch.element) {
                 if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
                 currentActiveBtn = btnMatch.element;
                 currentActiveBtn.classList.add('is-btn-active');
-                triggerHaptic(30);
             }
             const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
             const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
@@ -293,14 +289,19 @@ document.addEventListener('DOMContentLoaded', () => {
             currentActiveBtn = null;
         }
 
-        // Card spatial check (Pure arithmetic - zero reflow)
+        // Card spatial check - Instant sliding haptic trigger on card crossing
         const cardMatch = findCardAtPoint(touchX, touchY);
         if (cardMatch) {
             const newCtrl = cardMatch.controller;
             if (currentActiveCardObj !== newCtrl) {
                 if (currentActiveCardObj) currentActiveCardObj.release();
                 currentActiveCardObj = newCtrl;
-                currentActiveCardObj.activate(touchX, touchY, 0.99, true);
+                currentActiveCardObj.activate(touchX, touchY, 0.99);
+
+                if (lastVibratedCardEl !== cardMatch.element) {
+                    lastVibratedCardEl = cardMatch.element;
+                    triggerHaptic(35); // Instant sliding haptic pulse!
+                }
             } else {
                 newCtrl.handleMove(touchX, touchY);
             }
