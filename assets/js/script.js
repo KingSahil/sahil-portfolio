@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             },
 
             animatePhysics() {
-                this.currentRotateX += (this.targetRotateX - this.currentRotateX) * 0.10;
-                this.currentRotateY += (this.targetRotateY - this.currentRotateY) * 0.10;
-                this.currentScale += (this.targetScale - this.currentScale) * 0.10;
+                this.currentRotateX += (this.targetRotateX - this.currentRotateX) * 0.20;
+                this.currentRotateY += (this.targetRotateY - this.currentRotateY) * 0.20;
+                this.currentScale += (this.targetScale - this.currentScale) * 0.20;
 
                 this.card.style.transform = `perspective(800px) rotateX(${this.currentRotateX.toFixed(2)}deg) rotateY(${this.currentRotateY.toFixed(2)}deg) scale3d(${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)})`;
 
