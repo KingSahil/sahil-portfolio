@@ -4,268 +4,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sahil - Full Stack Developer</title>
+    <title>Sahil — Full Stack Developer & Automation Builder</title>
     <meta name="description"
-        content="Sahil's portfolio featuring live GitHub projects, current skills, and social links across LinkedIn, Instagram, X, and GitHub.">
-    <script>
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            if (params.get('embed') === '1' || window.self !== window.top) {
-                document.documentElement.classList.add('is-embedded');
-            }
-        })();
-    </script>
+        content="Personal single-screen portfolio of Sahil featuring social links, Discord, Instagram, GitHub, core tech stack, and contact info.">
+    
+    <!-- CSS & Fonts -->
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..700;1,300..700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
-    <!-- Contentful CMS -->
-    <script src="https://cdn.jsdelivr.net/npm/contentful@9/dist/contentful.browser.min.js"></script>
-    <script src="config/contentful-config.js"></script>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <h2>Supreme Sahil</h2>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#home" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#about" class="nav-link">About</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#skills" class="nav-link">Skills</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#projects" class="nav-link">Projects</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#blog" class="nav-link">Blog</a>
-                </li>
-                <li class="nav-item">
-                    <a href="#contact" class="nav-link">Contact</a>
-                </li>
-            </ul>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-        </div>
-    </nav>
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="custom-cursor"></div>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">Hi, I'm <span class="sahil-rouge">SAHIL</span></h1>
-                <h2 class="hero-subtitle">Full Stack Developer • Automation Builder • Creative Coder</h2>
-                <p class="hero-description">
-                    Based in Amritsar, I build practical web products, educational tools, automation utilities,
-                    and creative experiments. This portfolio pulls in my latest public GitHub work so it stays current.
-                </p>
-                <div class="hero-buttons">
-                    <a href="#projects" class="btn btn-primary">View Projects</a>
-                    <a href="assets/resume/resume.pdf" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+    <!-- Background Glow Effects -->
+    <div class="bg-radial-glow glow-1"></div>
+    <div class="bg-radial-glow glow-2"></div>
+
+    <!-- Main Viewport Wrapper (Fits 100vh on Desktop) -->
+    <main class="bento-viewport">
+        <div class="bento-container">
+            
+            <!-- 1. Hero / Main Profile Card -->
+            <article class="bento-card bento-hero">
+                <div class="hero-top">
+                    <div class="avatar-wrapper">
+                        <img src="https://avatars.githubusercontent.com/u/50039447?v=4" alt="Sahil" class="avatar-img">
+                        <span class="status-indicator" title="Available for projects"></span>
+                    </div>
+                    <div class="badge-status">
+                        <span class="dot"></span> Available for builds
+                    </div>
+                </div>
+                <div class="hero-content">
+                    <h1 class="hero-name">Sahil <span class="accent-text">.</span></h1>
+                    <p class="hero-title">Full-Stack Developer • Automation Builder • Creative Coder</p>
+                    <p class="hero-bio">
+                        Crafting intuitive web tools, automated utilities, and creative software. Based in Amritsar, shipping fast, practical digital products.
+                    </p>
+                    <div class="hero-location">
+                        <i class="fas fa-location-dot"></i> Amritsar, Punjab, India
+                    </div>
+                </div>
+                <div class="hero-footer">
+                    <a href="assets/resume/resume.pdf" target="_blank" rel="noopener noreferrer" class="bento-btn btn-primary">
                         <i class="fas fa-file-lines"></i>
-                        Check Out Resume
+                        <span>Resume</span>
                     </a>
-                    <a href="#contact" class="btn btn-secondary">Find Me Online</a>
-                </div>
-                <div class="hero-social">
-                    <a href="https://github.com/KingSahil" target="_blank" class="social-link">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/kingsahil/" target="_blank" class="social-link" aria-label="LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="https://www.instagram.com/supreme__sahil/" target="_blank" class="social-link" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://x.com/Sahil317405" target="_blank" class="social-link" aria-label="X">
-                        <i class="fa-brands fa-x-twitter"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@godsahil" target="_blank" class="social-link" aria-label="YouTube">
-                        <i class="fa-brands fa-youtube"></i>
+                    <a href="mailto:sahilgupta2150@gmail.com" class="bento-btn btn-secondary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Contact</span>
                     </a>
                 </div>
-            </div>
-            <div class="hero-image">
-                <div class="profile-image">
-                    <img src="https://avatars.githubusercontent.com/u/50039447?v=4" alt="Sahil's Profile Picture">
-                </div>
-            </div>
-        </div>
-    </section>
+            </article>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <h2 class="section-title">About Me</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>
-                        I'm a
-                        <span class="hover-preview-target" data-preview-image="assets/images/hover/coding-man.svg" data-preview-alt="Coding man illustration">full-stack developer</span>
-                        from Amritsar, India, focused on building useful digital products
-                        with clean UI,
-                        <span class="hover-preview-target" data-preview-image="assets/images/hover/automation-bot.svg" data-preview-alt="Automation bot illustration">practical automation</span>,
-                        and strong problem solving.
-                    </p>
-                    <p>
-                        My recent work spans vocabulary tools, clipboard utilities, student platforms,
-                        landing pages, and
-                        <span class="hover-preview-target" data-preview-image="assets/images/hover/creative-coder.svg" data-preview-alt="Creative coder illustration">creative experiments</span>
-                        in Python, JavaScript, TypeScript, and Godot.
-                    </p>
-                    <p>
-                        I like shipping quickly, learning in public, and turning ideas into small but polished products.
-                    </p>
-                </div>
-                <div class="about-visual" aria-label="Amritsar, Punjab illustration">
-                    <div class="about-location-card pressure-card">
-                        <span class="about-location-kicker">Current Base</span>
-                        <h3>Amritsar, Punjab</h3>
-                        <p>
-                            A city shaped by heritage, movement, and everyday energy. That local rhythm influences how I build: practical, direct, and designed to be used.
-                        </p>
-                    </div>
-                    <figure class="punjab-image-wrap pressure-card">
-                        <img class="punjab-image" src="assets/images/punjab.png" alt="Silhouette map of Punjab">
-                    </figure>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="skills">
-        <div class="container">
-            <h2 class="section-title">Skills & Technologies</h2>
-            <p class="section-intro">
-                A live snapshot built from the languages and patterns in my latest public GitHub repositories.
-            </p>
-            <div class="tech-playground-wrapper">
-                <div class="tech-playground-header">
-                    <h3>Tech Stack Playground</h3>
-                    <p>Drag and throw my tech stack</p>
-                </div>
-                <div id="tech-playground" class="tech-playground" aria-label="Playable tech stack window"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
-        <div class="container">
-            <h2 class="section-title">Featured Projects</h2>
-            <p class="section-intro">
-                The latest public repositories from GitHub, prioritized by recent activity and filtered for standout work.
-            </p>
-            <div class="projects-marquee" id="projects-container">
-                <div class="projects-track" id="projects-track">
-                    <article class="project-ticker-card loading-card">
-                        <h3>Loading latest projects...</h3>
-                    </article>
-                </div>
-            </div>
-            <div class="projects-cta">
-                <a href="https://github.com/KingSahil" target="_blank" class="btn btn-primary">
-                    View All Projects on GitHub
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Blog Section -->
-    <section id="blog" class="blog">
-        <div class="container">
-            <h2 class="section-title">Blog & Case Studies</h2>
-            <p class="section-intro">
-                Articles on building, learning, and shipping projects. Stories behind the code.
-            </p>
-            <div id="blog-list" class="blog-list">
-                <article class="post-tile loading-card">
-                    <h3>Loading articles...</h3>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="section-title">Get In Touch</h2>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <h3>Find Me Online</h3>
-                    <p>
-                        I share work, experiments, and updates across these platforms.
-                        If you want to collaborate, follow the work, or reach out, these are the best places.
-                    </p>
-                    <div class="contact-details">
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Amritsar, India</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fab fa-github"></i>
-                            <a href="https://github.com/KingSahil" target="_blank">github.com/KingSahil</a>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-file-lines"></i>
-                            <a href="assets/resume/resume.pdf" target="_blank" rel="noopener noreferrer">Check out my resume</a>
-                        </div>
+            <!-- 2. Tech Stack Card -->
+            <article class="bento-card bento-skills">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-code"></i>
+                        <span>Tech Stack</span>
                     </div>
                 </div>
-                <div class="contact-panel social-panel">
-                    <a href="https://www.linkedin.com/in/kingsahil/" target="_blank" class="social-card">
-                        <div class="social-card-icon"><i class="fab fa-linkedin-in"></i></div>
-                        <div>
-                            <h4>LinkedIn</h4>
-                            <p>Professional profile and work updates</p>
-                        </div>
-                    </a>
-                    <a href="https://www.instagram.com/supreme__sahil/" target="_blank" class="social-card">
-                        <div class="social-card-icon"><i class="fab fa-instagram"></i></div>
-                        <div>
-                            <h4>Instagram</h4>
-                            <p>Visual updates and personal moments</p>
-                        </div>
-                    </a>
-                    <a href="https://x.com/Sahil317405" target="_blank" class="social-card">
-                        <div class="social-card-icon"><i class="fa-brands fa-x-twitter"></i></div>
-                        <div>
-                            <h4>X</h4>
-                            <p>Thoughts, short updates, and experiments</p>
-                        </div>
-                    </a>
-                    <a href="https://github.com/KingSahil" target="_blank" class="social-card">
-                        <div class="social-card-icon"><i class="fab fa-github"></i></div>
-                        <div>
-                            <h4>GitHub</h4>
-                            <p>Code, repositories, and active public work</p>
-                        </div>
-                    </a>
-                    <a href="https://www.youtube.com/@godsahil" target="_blank" class="social-card">
-                        <div class="social-card-icon"><i class="fa-brands fa-youtube"></i></div>
-                        <div>
-                            <h4>YouTube</h4>
-                            <p>Videos, builds, and dev updates</p>
-                        </div>
-                    </a>
+                <div class="skills-grid">
+                    <div class="skill-pill">
+                        <i class="devicon-python-plain colored"></i>
+                        <span>Python</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-javascript-plain colored"></i>
+                        <span>JavaScript</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-typescript-plain colored"></i>
+                        <span>TypeScript</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-react-original colored"></i>
+                        <span>React</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-nodejs-plain colored"></i>
+                        <span>Node.js</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-godot-plain colored"></i>
+                        <span>Godot</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-docker-plain colored"></i>
+                        <span>Docker</span>
+                    </div>
+                    <div class="skill-pill">
+                        <i class="devicon-html5-plain colored"></i>
+                        <span>HTML5/CSS3</span>
+                    </div>
                 </div>
-            </div>
+            </article>
+
+            <!-- 3. Discord Card -->
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-discord" data-detail="here i yap 🗣️💬">
+                <div class="funny-popover">
+                    <span>here i yap 🗣️💬</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fab fa-discord"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">Discord</span>
+                    <span class="social-handle">@kingsahil</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 4. Instagram Card -->
+            <a href="https://www.instagram.com/supreme__sahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-instagram" data-detail="post techy reels 🎬📸">
+                <div class="funny-popover">
+                    <span>post techy reels 🎬📸</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fab fa-instagram"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">Instagram</span>
+                    <span class="social-handle">@supreme__sahil</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 5. GitHub Card -->
+            <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-github" data-detail="here i build 🔨⚡">
+                <div class="funny-popover">
+                    <span>here i build 🔨⚡</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fab fa-github"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">GitHub</span>
+                    <span class="social-handle">@KingSahil</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 6. LinkedIn Card -->
+            <a href="https://www.linkedin.com/in/kingsahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-linkedin" data-detail="pretend to act mature 👔💼">
+                <div class="funny-popover">
+                    <span>pretend to act mature 👔💼</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fab fa-linkedin-in"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">LinkedIn</span>
+                    <span class="social-handle">kingsahil</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 7. X (Twitter) Card -->
+            <a href="https://x.com/Sahil317405" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-x" data-detail="spicy dev takes & hot fixes 🌶️🔥">
+                <div class="funny-popover">
+                    <span>spicy dev takes & hot fixes 🌶️🔥</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">X / Twitter</span>
+                    <span class="social-handle">@Sahil317405</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 8. YouTube Card -->
+            <a href="https://www.youtube.com/@godsahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-youtube" data-detail="dev logs & tech builds 📹🚀">
+                <div class="funny-popover">
+                    <span>dev logs & tech builds 📹🚀</span>
+                </div>
+                <div class="social-icon-wrapper">
+                    <i class="fa-brands fa-youtube"></i>
+                </div>
+                <div class="social-info">
+                    <span class="social-platform">YouTube</span>
+                    <span class="social-handle">@godsahil</span>
+                </div>
+                <div class="card-arrow">
+                    <i class="fas fa-arrow-up-right"></i>
+                </div>
+            </a>
+
+            <!-- 9. Contact / Direct Email Card -->
+            <a href="mailto:sahilgupta2150@gmail.com" class="bento-card bento-contact">
+                <div class="contact-icon-bubble">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="contact-details">
+                    <span class="contact-label">Send a direct message</span>
+                    <span class="contact-email">sahilgupta2150@gmail.com</span>
+                </div>
+                <div class="contact-action-badge">
+                    <span>Email Me</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
         </div>
-    </section>
+    </main>
 
     <script src="assets/js/script.js"></script>
 </body>
