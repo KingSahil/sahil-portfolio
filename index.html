@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sahil — Full Stack Developer & Automation Builder</title>
     <meta name="description"
-        content="Personal single-screen portfolio of Sahil featuring social links, Discord, Instagram, GitHub, core tech stack, and contact info.">
+        content="Handcrafted single-screen portfolio of Sahil featuring interactive bento grid, dual sliding tech stack marquee, and social links.">
     
     <!-- CSS & Fonts -->
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..700;1,300..700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=JetBrains+Mono:ital,wght@0,300..700;1,300..700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css">
 </head>
@@ -25,7 +25,7 @@
     <div class="bg-radial-glow glow-1"></div>
     <div class="bg-radial-glow glow-2"></div>
 
-    <!-- Main Viewport Wrapper (Fits 100vh on Desktop) -->
+    <!-- Main Viewport Wrapper (Fits 100vh on Desktop & Mobile) -->
     <main class="bento-viewport">
         <div class="bento-container">
             
@@ -62,169 +62,125 @@
                 </div>
             </article>
 
-            <!-- 2. Tech Stack Card -->
-            <article class="bento-card bento-skills" data-detail="jack of all trades, master of shipping 🚀🃏">
-                <div class="funny-popover">
-                    <span>jack of all trades, master of shipping 🚀🃏</span>
-                </div>
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-code"></i>
-                        <span>Tech Stack</span>
+            <!-- 2. Featured GitHub Experiments Card with Stats -->
+            <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-github-card card-github">
+                <div class="github-doodle-tag">(@kingsahil)</div>
+                <div class="github-top-info">
+                    <div class="github-icon-bubble">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="github-text">
+                        <span class="github-title">GitHub</span>
+                        <span class="github-sub">My experiments (aka projects)</span>
                     </div>
                 </div>
-                <div class="skills-grid">
-                    <div class="skill-pill">
-                        <i class="devicon-python-plain colored"></i>
-                        <span>Python</span>
+                <div class="github-stats-bar">
+                    <div class="stat-item"><span class="stat-label">Stars:</span> <span class="stat-val">15</span></div>
+                    <div class="stat-item"><span class="stat-label">Followers:</span> <span class="stat-val">12</span></div>
+                    <div class="stat-item"><span class="stat-label">Repos:</span> <span class="stat-val">27</span></div>
+                </div>
+            </a>
+
+            <!-- 3. Dual Infinite Tech Stack Icon Marquee (Top Left, Bottom Right) -->
+            <article class="bento-card bento-tech-marquee">
+                <div class="tech-marquee-wrapper">
+                    <!-- Row 1: Sliding Left -->
+                    <div class="marquee-row marquee-left">
+                        <div class="marquee-track">
+                            <i class="devicon-html5-plain colored" title="HTML5"></i>
+                            <i class="devicon-css3-plain colored" title="CSS3"></i>
+                            <i class="devicon-javascript-plain colored" title="JavaScript"></i>
+                            <i class="devicon-typescript-plain colored" title="TypeScript"></i>
+                            <i class="devicon-react-original colored" title="React"></i>
+                            <i class="devicon-nextjs-original colored" title="Next.js"></i>
+                            <i class="devicon-nodejs-plain colored" title="Node.js"></i>
+                            <i class="devicon-python-plain colored" title="Python"></i>
+                            <!-- Duplicated for seamless infinite loop -->
+                            <i class="devicon-html5-plain colored" title="HTML5"></i>
+                            <i class="devicon-css3-plain colored" title="CSS3"></i>
+                            <i class="devicon-javascript-plain colored" title="JavaScript"></i>
+                            <i class="devicon-typescript-plain colored" title="TypeScript"></i>
+                            <i class="devicon-react-original colored" title="React"></i>
+                            <i class="devicon-nextjs-original colored" title="Next.js"></i>
+                            <i class="devicon-nodejs-plain colored" title="Node.js"></i>
+                            <i class="devicon-python-plain colored" title="Python"></i>
+                        </div>
                     </div>
-                    <div class="skill-pill">
-                        <i class="devicon-javascript-plain colored"></i>
-                        <span>JavaScript</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-typescript-plain colored"></i>
-                        <span>TypeScript</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-react-original colored"></i>
-                        <span>React</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-nodejs-plain colored"></i>
-                        <span>Node.js</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-godot-plain colored"></i>
-                        <span>Godot</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-docker-plain colored"></i>
-                        <span>Docker</span>
-                    </div>
-                    <div class="skill-pill">
-                        <i class="devicon-html5-plain colored"></i>
-                        <span>HTML5/CSS3</span>
+
+                    <!-- Row 2: Sliding Right -->
+                    <div class="marquee-row marquee-right">
+                        <div class="marquee-track">
+                            <i class="devicon-godot-plain colored" title="Godot Engine"></i>
+                            <i class="devicon-docker-plain colored" title="Docker"></i>
+                            <i class="devicon-cplusplus-plain colored" title="C++"></i>
+                            <i class="devicon-rust-plain colored" title="Rust"></i>
+                            <i class="devicon-fastapi-plain colored" title="FastAPI"></i>
+                            <i class="devicon-git-plain colored" title="Git"></i>
+                            <i class="devicon-tailwindcss-plain colored" title="Tailwind"></i>
+                            <i class="devicon-linux-plain colored" title="Linux"></i>
+                            <!-- Duplicated for seamless infinite loop -->
+                            <i class="devicon-godot-plain colored" title="Godot Engine"></i>
+                            <i class="devicon-docker-plain colored" title="Docker"></i>
+                            <i class="devicon-cplusplus-plain colored" title="C++"></i>
+                            <i class="devicon-rust-plain colored" title="Rust"></i>
+                            <i class="devicon-fastapi-plain colored" title="FastAPI"></i>
+                            <i class="devicon-git-plain colored" title="Git"></i>
+                            <i class="devicon-tailwindcss-plain colored" title="Tailwind"></i>
+                            <i class="devicon-linux-plain colored" title="Linux"></i>
+                        </div>
                     </div>
                 </div>
             </article>
 
-            <!-- 3. Discord Card -->
-            <a href="https://discord.com/users/prosahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-discord" data-detail="here i yap 🗣️💬">
+            <!-- 4. LinkedIn Block Card -->
+            <a href="https://www.linkedin.com/in/kingsahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-linkedin">
+                <i class="fab fa-linkedin-in"></i>
+                <span class="handwritten-sub">(serious stuff)</span>
+            </a>
+
+            <!-- 5. X (Twitter) Block Card -->
+            <a href="https://x.com/Sahil317405" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-x">
+                <i class="fa-brands fa-x-twitter"></i>
+                <span class="handwritten-sub">(share memes ;)</span>
+            </a>
+
+            <!-- 6. Discord Block Card -->
+            <a href="https://discord.com/users/prosahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-discord" data-detail="here i yap 🗣️💬">
                 <div class="funny-popover">
                     <span>here i yap 🗣️💬</span>
                 </div>
-                <div class="social-icon-wrapper">
-                    <i class="fab fa-discord"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">Discord</span>
-                    <span class="social-handle">@prosahil</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
+                <i class="fab fa-discord"></i>
+                <span class="handwritten-sub">(here i yap)</span>
             </a>
 
-            <!-- 4. Instagram Card -->
-            <a href="https://www.instagram.com/supreme__sahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-instagram" data-detail="post techy reels 🎬📸">
+            <!-- 7. Instagram Block Card -->
+            <a href="https://www.instagram.com/supreme__sahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-instagram" data-detail="post techy reels 🎬📸">
                 <div class="funny-popover">
                     <span>post techy reels 🎬📸</span>
                 </div>
-                <div class="social-icon-wrapper">
-                    <i class="fab fa-instagram"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">Instagram</span>
-                    <span class="social-handle">@supreme__sahil</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
+                <i class="fab fa-instagram"></i>
+                <span class="handwritten-sub">(techy reels)</span>
             </a>
 
-            <!-- 5. GitHub Card -->
-            <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-github" data-detail="here i build 🔨⚡">
+            <!-- 8. YouTube Block Card -->
+            <a href="https://www.youtube.com/@godsahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-youtube" data-detail="dev builds 📹🚀">
                 <div class="funny-popover">
-                    <span>here i build 🔨⚡</span>
+                    <span>dev builds 📹🚀</span>
                 </div>
-                <div class="social-icon-wrapper">
-                    <i class="fab fa-github"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">GitHub</span>
-                    <span class="social-handle">@KingSahil</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
+                <i class="fa-brands fa-youtube"></i>
+                <span class="handwritten-sub">(dev builds)</span>
             </a>
 
-            <!-- 6. LinkedIn Card -->
-            <a href="https://www.linkedin.com/in/kingsahil/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-linkedin" data-detail="pretend to act mature 👔💼">
+            <!-- 9. Reddit Block Card -->
+            <a href="https://www.reddit.com/user/Affectionate-Mix1611/" target="_blank" rel="noopener noreferrer" class="bento-card bento-social-block block-reddit" data-detail="what is this error? 🤖❓">
                 <div class="funny-popover">
-                    <span>pretend to act mature 👔💼</span>
+                    <span>what is this error? 🤖❓</span>
                 </div>
-                <div class="social-icon-wrapper">
-                    <i class="fab fa-linkedin-in"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">LinkedIn</span>
-                    <span class="social-handle">kingsahil</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
+                <i class="fab fa-reddit-alien"></i>
+                <span class="handwritten-sub">"What is this error?"</span>
             </a>
 
-            <!-- 7. X (Twitter) Card -->
-            <a href="https://x.com/Sahil317405" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-x" data-detail="spicy dev takes & hot fixes 🌶️🔥">
-                <div class="funny-popover">
-                    <span>spicy dev takes & hot fixes 🌶️🔥</span>
-                </div>
-                <div class="social-icon-wrapper">
-                    <i class="fa-brands fa-x-twitter"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">X / Twitter</span>
-                    <span class="social-handle">@Sahil317405</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
-            </a>
 
-            <!-- 8. YouTube Card -->
-            <a href="https://www.youtube.com/@godsahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-social card-youtube" data-detail="dev logs & tech builds 📹🚀">
-                <div class="funny-popover">
-                    <span>dev logs & tech builds 📹🚀</span>
-                </div>
-                <div class="social-icon-wrapper">
-                    <i class="fa-brands fa-youtube"></i>
-                </div>
-                <div class="social-info">
-                    <span class="social-platform">YouTube</span>
-                    <span class="social-handle">@godsahil</span>
-                </div>
-                <div class="card-arrow">
-                    <i class="fas fa-arrow-up-right"></i>
-                </div>
-            </a>
-
-            <!-- 9. Contact / Direct Email Card -->
-            <a href="mailto:sahilgupta2150@gmail.com" class="bento-card bento-contact">
-                <div class="contact-icon-bubble">
-                    <i class="fas fa-envelope-open-text"></i>
-                </div>
-                <div class="contact-details">
-                    <span class="contact-label">Send a direct message</span>
-                    <span class="contact-email">sahilgupta2150@gmail.com</span>
-                </div>
-                <div class="contact-action-badge">
-                    <span>Email Me</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
 
         </div>
     </main>
