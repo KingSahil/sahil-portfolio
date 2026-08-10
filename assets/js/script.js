@@ -7,16 +7,30 @@
 document.addEventListener('DOMContentLoaded', () => {
     let lastVibratedCardEl = null;
 
-    // Helper for haptic vibration
-    function triggerHaptic(pattern = 40) {
+    let isHapticPrimed = false;
+
+    // Helper for haptic vibration with Android Chrome security activation priming
+    function triggerHaptic(pattern = 35) {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
                 navigator.vibrate(pattern);
             } catch (e) {
-                // Silently ignore browser security blocks
+                // Ignore security blocks
             }
         }
     }
+
+    function primeHaptics() {
+        if (!isHapticPrimed && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            try {
+                navigator.vibrate(25);
+                isHapticPrimed = true;
+            } catch (e) {}
+        }
+    }
+
+    window.addEventListener('pointerdown', primeHaptics, { capture: true, passive: true });
+    window.addEventListener('touchstart', primeHaptics, { capture: true, passive: true });
 
     // 1. Custom Cursor Logic (Desktop Only)
     const cursor = document.getElementById('custom-cursor');
