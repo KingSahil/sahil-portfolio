@@ -427,16 +427,34 @@ html, body {
 }
 
 .bento-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 0.55rem 1rem;
-    border-radius: var(--radius-sm);
+    padding: 0.55rem 1.1rem;
+    border-radius: 14px;
     font-size: 0.82rem;
     font-weight: 600;
     text-decoration: none;
-    transition: all 0.2s ease;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    z-index: 5;
+}
+
+/* Apple Liquid Glass Specular Shine Glare */
+.bento-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--btn-x, 50%) var(--btn-y, 50%), rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 65%);
+    opacity: var(--btn-shine-opacity, 0);
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 2;
 }
 
 .btn-primary {
@@ -445,22 +463,26 @@ html, body {
     box-shadow: 0 4px 15px rgba(255, 0, 51, 0.35);
 }
 
-.btn-primary:hover {
-    background: #e6002e;
-    box-shadow: 0 6px 20px rgba(255, 0, 51, 0.5);
-    transform: translateY(-2px);
+.btn-primary:hover, .btn-primary.is-btn-active {
+    background: #ff1a47;
+    box-shadow: 0 10px 25px rgba(255, 0, 51, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    transform: scale(1.1) translateY(-3px);
+    --btn-shine-opacity: 1;
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.07);
     color: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px);
 }
 
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+.btn-secondary:hover, .btn-secondary.is-btn-active {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    transform: scale(1.1) translateY(-3px);
+    --btn-shine-opacity: 1;
 }
 
 /* --------------------------------------------------------------------------

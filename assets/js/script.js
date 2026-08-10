@@ -5,6 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     let lastVibratedCardEl = null;
+    let lastVibratedBtnEl = null;
 
     // Helper function for mobile haptic feedback
     function triggerHaptic(pattern = 40) {
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Ultra-Smooth Google Android Style 3D Touch/Pointer Pressure Effect
+    // 2. Bento Card 3D Pressure Physics
     const cardNodes = document.querySelectorAll('.bento-card');
     const cardMap = new Map();
     let currentActiveCardObj = null;
@@ -55,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             },
 
             animatePhysics() {
-                // Smooth spring lerp interpolation (0.10 dampening for silky smooth decay)
                 this.currentRotateX += (this.targetRotateX - this.currentRotateX) * 0.10;
                 this.currentRotateY += (this.targetRotateY - this.currentRotateY) * 0.10;
                 this.currentScale += (this.targetScale - this.currentScale) * 0.10;
@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const centerX = this.bounds.width / 2;
                 const centerY = this.bounds.height / 2;
 
-                // Subtle tilt max 3.5 deg
                 this.targetRotateX = ((centerY - y) / centerY) * 3.5;
                 this.targetRotateY = ((x - centerX) / centerX) * 3.5;
 
@@ -110,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (isTouch && lastVibratedCardEl !== this.card) {
                     lastVibratedCardEl = this.card;
-                    triggerHaptic(40); // 40ms pulse on card enter
+                    triggerHaptic(40);
                 }
             },
 
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.targetScale = 1;
                 this.card.style.setProperty('--touch-opacity', '0');
                 this.card.blur();
-                this.startAnimationLoop(); // Smooth lerp decay back to flat zero!
+                this.startAnimationLoop();
             }
         };
 
@@ -131,14 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cardMap.set(card, cardObj);
 
-        // Direct PointerDown Trigger (Guarantees user activation registration on Android Chrome)
         card.addEventListener('pointerdown', (e) => {
             if (e.pointerType === 'touch') {
                 triggerHaptic(40);
             }
         });
 
-        // Desktop Mouse Events
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
                 cardObj.activate(e.clientX, e.clientY, 1.008, false);
@@ -154,11 +151,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Global Mobile Finger Dragging across elements
+    // 3. Apple VisionOS Style Specular Glass Glare for Buttons (.bento-btn)
+    const bentoBtns = document.querySelectorAll('.bento-btn');
+    let currentActiveBtn = null;
+
+    function handleBtnMove(btn, clientX, clientY) {
+        const btnBounds = btn.getBoundingClientRect();
+        const btnX = clientX - btnBounds.left;
+        const btnY = clientY - btnBounds.top;
+        const pctX = ((btnX / btnBounds.width) * 100).toFixed(1);
+        const pctY = ((btnY / btnBounds.height) * 100).toFixed(1);
+
+        btn.style.setProperty('--btn-x', `${pctX}%`);
+        btn.style.setProperty('--btn-y', `${pctY}%`);
+    }
+
+    bentoBtns.forEach((btn) => {
+        btn.addEventListener('mousemove', (e) => {
+            handleBtnMove(btn, e.clientX, e.clientY);
+        });
+    });
+
+    // Global Mobile Finger Dragging across cards and buttons
     window.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
         const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
         const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
+        const btnEl = targetEl ? targetEl.closest('.bento-btn') : null;
+
+        if (btnEl) {
+            if (currentActiveBtn !== btnEl) {
+                if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
+                currentActiveBtn = btnEl;
+                currentActiveBtn.classList.add('is-btn-active');
+                triggerHaptic(30);
+            }
+            handleBtnMove(btnEl, touch.clientX, touch.clientY);
+        }
 
         if (cardEl && cardMap.has(cardEl)) {
             currentActiveCardObj = cardMap.get(cardEl);
@@ -170,7 +199,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const touch = e.touches[0];
         const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
         const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
+        const btnEl = targetEl ? targetEl.closest('.bento-btn') : null;
 
+        // Button tracking during drag
+        if (btnEl) {
+            if (currentActiveBtn !== btnEl) {
+                if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
+                currentActiveBtn = btnEl;
+                currentActiveBtn.classList.add('is-btn-active');
+                triggerHaptic(30); // Apple button activation pulse
+            }
+            handleBtnMove(btnEl, touch.clientX, touch.clientY);
+        } else if (currentActiveBtn) {
+            currentActiveBtn.classList.remove('is-btn-active');
+            currentActiveBtn = null;
+        }
+
+        // Card tracking during drag
         if (cardEl && cardMap.has(cardEl)) {
             const newCardObj = cardMap.get(cardEl);
             if (currentActiveCardObj !== newCardObj) {
@@ -194,7 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentActiveCardObj.release();
             currentActiveCardObj = null;
         }
+        if (currentActiveBtn) {
+            currentActiveBtn.classList.remove('is-btn-active');
+            currentActiveBtn = null;
+        }
         lastVibratedCardEl = null;
+        lastVibratedBtnEl = null;
     }
 
     window.addEventListener('touchend', clearTouchState);
