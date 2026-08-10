@@ -4,6 +4,19 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    let lastVibratedCardEl = null;
+
+    // Helper function for mobile haptic feedback
+    function triggerHaptic(pattern = 40) {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            try {
+                navigator.vibrate(pattern);
+            } catch (e) {
+                // Ignore if browser restricts vibration during move
+            }
+        }
+    }
+
     // 1. Custom Cursor Logic
     const cursor = document.getElementById('custom-cursor');
 
@@ -89,11 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.startAnimationLoop();
             },
 
-            activate(clientX, clientY, scale = 0.99) {
+            activate(clientX, clientY, scale = 0.99, isTouch = false) {
                 this.updateBounds();
                 this.card.classList.add('is-touch-pressed');
                 this.targetScale = scale;
                 this.handleMove(clientX, clientY);
+
+                if (isTouch && lastVibratedCardEl !== this.card) {
+                    lastVibratedCardEl = this.card;
+                    triggerHaptic(40); // 40ms pulse on card enter
+                }
             },
 
             release() {
@@ -113,10 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cardMap.set(card, cardObj);
 
-        // Desktop Pointer Events
+        // Direct PointerDown Trigger (Guarantees user activation registration on Android Chrome)
+        card.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'touch') {
+                triggerHaptic(40);
+            }
+        });
+
+        // Desktop Mouse Events
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
-                cardObj.activate(e.clientX, e.clientY, 1.008);
+                cardObj.activate(e.clientX, e.clientY, 1.008, false);
             });
 
             card.addEventListener('mousemove', (e) => {
@@ -129,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Global Mobile Finger Dragging across elements & smooth release
+    // Global Mobile Finger Dragging across elements
     window.addEventListener('touchstart', (e) => {
         const touch = e.touches[0];
         const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -137,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cardEl && cardMap.has(cardEl)) {
             currentActiveCardObj = cardMap.get(cardEl);
-            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99);
+            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99, true);
         }
     }, { passive: true });
 
@@ -148,28 +173,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cardEl && cardMap.has(cardEl)) {
             const newCardObj = cardMap.get(cardEl);
-            if (currentActiveCardObj && currentActiveCardObj !== newCardObj) {
-                currentActiveCardObj.release();
+            if (currentActiveCardObj !== newCardObj) {
+                if (currentActiveCardObj) {
+                    currentActiveCardObj.release();
+                }
+                currentActiveCardObj = newCardObj;
+                currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99, true);
+            } else {
+                newCardObj.handleMove(touch.clientX, touch.clientY);
             }
-            currentActiveCardObj = newCardObj;
-            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99);
         } else if (currentActiveCardObj) {
             currentActiveCardObj.release();
             currentActiveCardObj = null;
+            lastVibratedCardEl = null;
         }
     }, { passive: true });
 
-    window.addEventListener('touchend', () => {
+    function clearTouchState() {
         if (currentActiveCardObj) {
             currentActiveCardObj.release();
             currentActiveCardObj = null;
         }
-    });
+        lastVibratedCardEl = null;
+    }
 
-    window.addEventListener('touchcancel', () => {
-        if (currentActiveCardObj) {
-            currentActiveCardObj.release();
-            currentActiveCardObj = null;
-        }
-    });
+    window.addEventListener('touchend', clearTouchState);
+    window.addEventListener('touchcancel', clearTouchState);
 });
