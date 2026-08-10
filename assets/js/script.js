@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let halfWidthTop = 0;
     let halfWidthBottom = 0;
 
-    const baseSpeed = 1.0; // Base ambient speed (px / frame)
+    const baseSpeed = 0.55; // Relaxed, elegant base ambient speed (px / frame)
     let targetSpeedTop = baseSpeed;
     let targetSpeedBottom = baseSpeed;
     let currentSpeedTop = baseSpeed;
@@ -190,12 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (pctX < 45) {
                         // Holding/resting on LEFT side: Top row (moving left) speeds up!
                         const intensity = Math.min(1, (45 - pctX) / 45);
-                        targetSpeedTop = baseSpeed + (intensity * 1.2); // Subtle boost from 1.0 to 2.2px/frame
+                        targetSpeedTop = baseSpeed + (intensity * 0.9); // Subtle boost from 0.55 to 1.45px/frame
                         targetSpeedBottom = baseSpeed;
                     } else if (pctX > 55) {
                         // Holding/resting on RIGHT side: Bottom row (moving right) speeds up!
                         const intensity = Math.min(1, (pctX - 55) / 45);
-                        targetSpeedBottom = baseSpeed + (intensity * 1.2); // Subtle boost from 1.0 to 2.2px/frame
+                        targetSpeedBottom = baseSpeed + (intensity * 0.9); // Subtle boost from 0.55 to 1.45px/frame
                         targetSpeedTop = baseSpeed;
                     } else {
                         // Resting in middle (45% to 55%): Base speed!
@@ -306,11 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctrl = item.controller;
 
         card.addEventListener('contextmenu', (e) => e.preventDefault());
-        card.addEventListener('pointerdown', (e) => {
-            if (e.pointerType === 'touch') {
-                triggerHaptic(45);
-            }
-        });
 
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
@@ -325,9 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Button Pointer Movement (Desktop)
+    // Button Pointer Movement & Context Menu Prevention
     spatialBtns.forEach(item => {
         const btn = item.element;
+        btn.addEventListener('contextmenu', (e) => e.preventDefault());
         btn.addEventListener('mousemove', (e) => {
             const pctX = ((e.clientX - item.left) / item.width) * 100;
             const pctY = ((e.clientY - item.top) / item.height) * 100;
@@ -347,7 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnMatch) {
             currentActiveBtn = btnMatch.element;
             currentActiveBtn.classList.add('is-btn-active');
-            triggerHaptic(35);
+            const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
+            const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
+            currentActiveBtn.style.setProperty('--btn-x', `${pctX}%`);
+            currentActiveBtn.style.setProperty('--btn-y', `${pctY}%`);
+            triggerHaptic(30);
         }
 
         const cardMatch = findCardAtPoint(touchX, touchY);
@@ -371,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
                 currentActiveBtn = btnMatch.element;
                 currentActiveBtn.classList.add('is-btn-active');
+                triggerHaptic(30);
             }
             const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
             const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
@@ -405,14 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     function clearTouchState() {
+        bentoBtns.forEach(btn => {
+            btn.classList.remove('is-btn-active');
+            btn.style.setProperty('--btn-shine-opacity', '0');
+        });
         if (currentActiveCardObj) {
             currentActiveCardObj.release();
             currentActiveCardObj = null;
         }
-        if (currentActiveBtn) {
-            currentActiveBtn.classList.remove('is-btn-active');
-            currentActiveBtn = null;
-        }
+        currentActiveBtn = null;
         isHoldingTechCard = false;
         targetSpeedTop = baseSpeed;
         targetSpeedBottom = baseSpeed;
@@ -421,6 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('touchend', clearTouchState, { passive: true });
     window.addEventListener('touchcancel', clearTouchState, { passive: true });
+    window.addEventListener('pointerup', clearTouchState, { passive: true });
+    window.addEventListener('pointercancel', clearTouchState, { passive: true });
 
     // Live GitHub API Stats Fetcher for KingSahil
     async function fetchGitHubStats() {

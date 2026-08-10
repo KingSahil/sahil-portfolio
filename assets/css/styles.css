@@ -339,7 +339,12 @@ html, body {
     overflow: hidden;
     transform-style: preserve-3d;
     will-change: transform, box-shadow;
-    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s ease, background-color 0.28s ease, border-color 0.28s ease;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    outline: none;
     z-index: 5;
 }
 
@@ -363,8 +368,8 @@ html, body {
 
 .btn-primary:hover, .btn-primary.is-btn-active {
     background: #ff1a47;
-    box-shadow: 0 10px 25px rgba(255, 0, 51, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.4);
-    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 12px 28px rgba(255, 0, 51, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    transform: scale(1.12) translateY(-2px);
     --btn-shine-opacity: 1;
 }
 
@@ -376,10 +381,10 @@ html, body {
 }
 
 .btn-secondary:hover, .btn-secondary.is-btn-active {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.5);
-    transform: scale(1.08) translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 12px 28px rgba(255, 255, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    transform: scale(1.12) translateY(-2px);
     --btn-shine-opacity: 1;
 }
 
