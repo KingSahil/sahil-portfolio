@@ -1,15 +1,13 @@
 /* ==========================================================================
    HANDCRAFTED BENTO INTERACTIVITY & HIGH-PERFORMANCE DSA TOUCH ENGINE
    Developer: Sahil
-   Optimization: DSA Spatial Indexing (Zero Layout Reflow on Touch Drag)
+   Optimization: DSA Spatial Indexing & Smooth Continuous Marquee Engine
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     let lastVibratedCardEl = null;
 
-    let isHapticPrimed = false;
-
-    // Helper for haptic vibration with Android Chrome security activation priming
+    // Helper for haptic vibration
     function triggerHaptic(pattern = 35) {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
@@ -19,18 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
-    function primeHaptics() {
-        if (!isHapticPrimed && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-            try {
-                navigator.vibrate(25);
-                isHapticPrimed = true;
-            } catch (e) {}
-        }
-    }
-
-    window.addEventListener('pointerdown', primeHaptics, { capture: true, passive: true });
-    window.addEventListener('touchstart', primeHaptics, { capture: true, passive: true });
 
     // 1. Custom Cursor Logic (Desktop Only)
     const cursor = document.getElementById('custom-cursor');
@@ -47,6 +33,85 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
         });
     }
+
+    // ==========================================================================
+    // HIGH-PERFORMANCE CONTINUOUS INFINITE MARQUEE ENGINE (ZERO JERK, ZERO JUMP)
+    // ==========================================================================
+    const trackTop = document.getElementById('marquee-track-top');
+    const trackBottom = document.getElementById('marquee-track-bottom');
+
+    let posTop = 0;
+    let posBottom = 0;
+    let halfWidthTop = 0;
+    let halfWidthBottom = 0;
+
+    const baseSpeed = 1.0; // Base ambient speed (px / frame)
+    let targetSpeedTop = baseSpeed;
+    let targetSpeedBottom = baseSpeed;
+    let currentSpeedTop = baseSpeed;
+    let currentSpeedBottom = baseSpeed;
+
+    let isHoldingTechCard = false;
+    let techTouchStartX = 0;
+
+    function measureMarqueeWidths() {
+        if (trackTop) {
+            const g = trackTop.querySelector('.marquee-group');
+            if (g && g.offsetWidth > 0) halfWidthTop = g.offsetWidth;
+        }
+        if (trackBottom) {
+            const g = trackBottom.querySelector('.marquee-group');
+            if (g && g.offsetWidth > 0) halfWidthBottom = g.offsetWidth;
+        }
+    }
+    
+    measureMarqueeWidths();
+    setTimeout(measureMarqueeWidths, 100);
+    setTimeout(measureMarqueeWidths, 500);
+    window.addEventListener('load', measureMarqueeWidths, { passive: true });
+    window.addEventListener('resize', measureMarqueeWidths, { passive: true });
+
+    function stepMarqueeLoop() {
+        // Fallback width check
+        if (halfWidthTop === 0 && trackTop) {
+            const g = trackTop.querySelector('.marquee-group');
+            if (g && g.offsetWidth > 0) halfWidthTop = g.offsetWidth;
+        }
+        if (halfWidthBottom === 0 && trackBottom) {
+            const g = trackBottom.querySelector('.marquee-group');
+            if (g && g.offsetWidth > 0) halfWidthBottom = g.offsetWidth;
+        }
+
+        const effectiveHalfTop = halfWidthTop || 450;
+        const effectiveHalfBottom = halfWidthBottom || 450;
+
+        // Smooth lerp speed transition (Zero jerk, zero jump!)
+        currentSpeedTop += (targetSpeedTop - currentSpeedTop) * 0.08;
+        currentSpeedBottom += (targetSpeedBottom - currentSpeedBottom) * 0.08;
+
+        // Top Row ALWAYS moves LEFT ONLY (DSA Modulo Virtualization)
+        if (trackTop) {
+            posTop -= currentSpeedTop;
+            const wrapWidth = halfWidthTop || 450;
+            if (Math.abs(posTop) >= wrapWidth) {
+                posTop = posTop % wrapWidth; // Modulo Ring Buffer Wrap
+            }
+            trackTop.style.transform = `translate3d(${posTop}px, 0, 0)`;
+        }
+
+        // Bottom Row ALWAYS moves RIGHT ONLY (DSA Modulo Virtualization)
+        if (trackBottom) {
+            posBottom += currentSpeedBottom;
+            const wrapWidth = halfWidthBottom || 450;
+            if (posBottom >= 0) {
+                posBottom = -wrapWidth + (posBottom % wrapWidth); // Modulo Ring Buffer Wrap
+            }
+            trackBottom.style.transform = `translate3d(${posBottom}px, 0, 0)`;
+        }
+
+        requestAnimationFrame(stepMarqueeLoop);
+    }
+    requestAnimationFrame(stepMarqueeLoop);
 
     // ==========================================================================
     // DSA SPATIAL INDEX ENGINE (O(1) Bounds Lookup - Zero DOM Layout Reflow)
@@ -105,14 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const centerX = this.bounds.width * 0.5;
                 const centerY = this.bounds.height * 0.5;
 
-                // Normalize 3D tilt across card dimensions so physical edge lift is identical for all cards
-                const baseSize = 220;
-                const normX = Math.min(1, baseSize / Math.max(1, this.bounds.width));
-                const normY = Math.min(1, baseSize / Math.max(1, this.bounds.height));
-                const maxAngle = 2.4;
+                // Responsive tilt scaling with enhanced left/right (Y-axis) tilt responsiveness
+                const isMobile = window.innerWidth <= 768;
+                const maxAngleX = isMobile ? 3.6 : 2.8;
+                const maxAngleY = isMobile ? 5.6 : 4.8; // Boosted left/right tilt
 
-                this.targetRotateX = ((centerY - y) / centerY) * maxAngle * normY;
-                this.targetRotateY = ((x - centerX) / centerX) * maxAngle * normX;
+                this.targetRotateX = ((centerY - y) / centerY) * maxAngleX;
+                this.targetRotateY = ((x - centerX) / centerX) * maxAngleY;
 
                 const pctX = (x / this.bounds.width) * 100;
                 const pctY = (y / this.bounds.height) * 100;
@@ -121,12 +185,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.card.style.setProperty('--touch-y', `${pctY}%`);
                 this.card.style.setProperty('--touch-opacity', '1');
 
+                // Absolute Spatial Positioning Acceleration (Holding Left or Right)
+                if (this.card.classList.contains('bento-tech-marquee')) {
+                    if (pctX < 45) {
+                        // Holding/resting on LEFT side: Top row (moving left) speeds up!
+                        const intensity = Math.min(1, (45 - pctX) / 45);
+                        targetSpeedTop = baseSpeed + (intensity * 1.2); // Subtle boost from 1.0 to 2.2px/frame
+                        targetSpeedBottom = baseSpeed;
+                    } else if (pctX > 55) {
+                        // Holding/resting on RIGHT side: Bottom row (moving right) speeds up!
+                        const intensity = Math.min(1, (pctX - 55) / 45);
+                        targetSpeedBottom = baseSpeed + (intensity * 1.2); // Subtle boost from 1.0 to 2.2px/frame
+                        targetSpeedTop = baseSpeed;
+                    } else {
+                        // Resting in middle (45% to 55%): Base speed!
+                        targetSpeedTop = baseSpeed;
+                        targetSpeedBottom = baseSpeed;
+                    }
+                }
+
                 this.isDirty = true;
             },
 
             activate(clientX, clientY, scale = 0.99) {
                 this.card.classList.add('is-touch-pressed');
                 this.targetScale = scale;
+                if (this.card.classList.contains('bento-tech-marquee')) {
+                    isHoldingTechCard = true;
+                    techTouchStartX = clientX;
+                }
                 this.handleMove(clientX, clientY);
             },
 
@@ -136,6 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.targetRotateY = 0;
                 this.targetScale = 1;
                 this.card.style.setProperty('--touch-opacity', '0');
+                if (this.card.classList.contains('bento-tech-marquee')) {
+                    isHoldingTechCard = false;
+                    targetSpeedTop = baseSpeed;
+                    targetSpeedBottom = baseSpeed;
+                }
                 this.isDirty = true;
             }
         };
@@ -187,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requestAnimationFrame(globalPhysicsLoop);
 
-    // O(N) Pure Arithmetic Point-in-Rectangle DSA Lookup (No DOM layout query)
+    // O(N) Pure Arithmetic Point-in-Rectangle DSA Lookup
     function findCardAtPoint(x, y) {
         for (let i = 0; i < spatialCards.length; i++) {
             const item = spatialCards[i];
@@ -222,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
-                ctrl.activate(e.clientX, e.clientY, 1.008, false);
+                ctrl.activate(e.clientX, e.clientY, 1.008);
             });
             card.addEventListener('mousemove', (e) => {
                 ctrl.handleMove(e.clientX, e.clientY);
@@ -263,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentActiveCardObj = cardMatch.controller;
             currentActiveCardObj.activate(touchX, touchY, 0.99);
             lastVibratedCardEl = cardMatch.element;
-            triggerHaptic(45); // Instant haptic feedback as soon as card is touched!
+            triggerHaptic(45);
         }
     }, { passive: true });
 
@@ -300,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (lastVibratedCardEl !== cardMatch.element) {
                     lastVibratedCardEl = cardMatch.element;
-                    triggerHaptic(35); // Instant sliding haptic pulse!
+                    triggerHaptic(35);
                 }
             } else {
                 newCtrl.handleMove(touchX, touchY);
@@ -321,6 +413,9 @@ document.addEventListener('DOMContentLoaded', () => {
             currentActiveBtn.classList.remove('is-btn-active');
             currentActiveBtn = null;
         }
+        isHoldingTechCard = false;
+        targetSpeedTop = baseSpeed;
+        targetSpeedBottom = baseSpeed;
         lastVibratedCardEl = null;
     }
 
