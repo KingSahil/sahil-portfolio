@@ -21,126 +21,155 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Ultra-Smooth Google Android Style 3D Touch/Pointer Pressure Effect
-    const cards = document.querySelectorAll('.bento-card');
+    const cardNodes = document.querySelectorAll('.bento-card');
+    const cardMap = new Map();
+    let currentActiveCardObj = null;
 
-    cards.forEach((card) => {
-        let bounds = card.getBoundingClientRect();
-        let targetRotateX = 0;
-        let targetRotateY = 0;
-        let targetScale = 1;
-        let currentRotateX = 0;
-        let currentRotateY = 0;
-        let currentScale = 1;
-        let animationFrameId = null;
+    cardNodes.forEach((card) => {
+        const cardObj = {
+            card: card,
+            bounds: card.getBoundingClientRect(),
+            targetRotateX: 0,
+            targetRotateY: 0,
+            targetScale: 1,
+            currentRotateX: 0,
+            currentRotateY: 0,
+            currentScale: 1,
+            animationFrameId: null,
 
-        function updateBounds() {
-            bounds = card.getBoundingClientRect();
-        }
+            updateBounds() {
+                this.bounds = this.card.getBoundingClientRect();
+            },
 
-        window.addEventListener('resize', updateBounds);
-        window.addEventListener('scroll', updateBounds, { passive: true });
+            animatePhysics() {
+                // Smooth spring lerp interpolation (0.10 dampening for silky smooth decay)
+                this.currentRotateX += (this.targetRotateX - this.currentRotateX) * 0.10;
+                this.currentRotateY += (this.targetRotateY - this.currentRotateY) * 0.10;
+                this.currentScale += (this.targetScale - this.currentScale) * 0.10;
 
-        function resetCardState() {
-            card.classList.remove('is-touch-pressed');
-            targetRotateX = 0;
-            targetRotateY = 0;
-            targetScale = 1;
-            currentRotateX = 0;
-            currentRotateY = 0;
-            currentScale = 1;
-            card.style.setProperty('--touch-opacity', '0');
-            card.style.transform = 'none';
-            card.blur();
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
+                this.card.style.transform = `perspective(800px) rotateX(${this.currentRotateX.toFixed(2)}deg) rotateY(${this.currentRotateY.toFixed(2)}deg) scale3d(${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)})`;
+
+                const deltaX = Math.abs(this.targetRotateX - this.currentRotateX);
+                const deltaY = Math.abs(this.targetRotateY - this.currentRotateY);
+                const deltaScale = Math.abs(this.targetScale - this.currentScale);
+
+                if (deltaX > 0.01 || deltaY > 0.01 || deltaScale > 0.001) {
+                    this.animationFrameId = requestAnimationFrame(() => this.animatePhysics());
+                } else {
+                    if (this.targetRotateX === 0 && this.targetRotateY === 0 && this.targetScale === 1) {
+                        this.card.style.transform = 'none';
+                    }
+                    this.animationFrameId = null;
+                }
+            },
+
+            startAnimationLoop() {
+                if (!this.animationFrameId) {
+                    this.animationFrameId = requestAnimationFrame(() => this.animatePhysics());
+                }
+            },
+
+            handleMove(clientX, clientY) {
+                const x = clientX - this.bounds.left;
+                const y = clientY - this.bounds.top;
+                const centerX = this.bounds.width / 2;
+                const centerY = this.bounds.height / 2;
+
+                // Subtle tilt max 3.5 deg
+                this.targetRotateX = ((centerY - y) / centerY) * 3.5;
+                this.targetRotateY = ((x - centerX) / centerX) * 3.5;
+
+                const pctX = ((x / this.bounds.width) * 100).toFixed(1);
+                const pctY = ((y / this.bounds.height) * 100).toFixed(1);
+
+                this.card.style.setProperty('--touch-x', `${pctX}%`);
+                this.card.style.setProperty('--touch-y', `${pctY}%`);
+                this.card.style.setProperty('--touch-opacity', '1');
+
+                this.startAnimationLoop();
+            },
+
+            activate(clientX, clientY, scale = 0.99) {
+                this.updateBounds();
+                this.card.classList.add('is-touch-pressed');
+                this.targetScale = scale;
+                this.handleMove(clientX, clientY);
+            },
+
+            release() {
+                this.card.classList.remove('is-touch-pressed');
+                this.targetRotateX = 0;
+                this.targetRotateY = 0;
+                this.targetScale = 1;
+                this.card.style.setProperty('--touch-opacity', '0');
+                this.card.blur();
+                this.startAnimationLoop(); // Smooth lerp decay back to flat zero!
             }
-        }
+        };
 
-        function animatePhysics() {
-            currentRotateX += (targetRotateX - currentRotateX) * 0.15;
-            currentRotateY += (targetRotateY - currentRotateY) * 0.15;
-            currentScale += (targetScale - currentScale) * 0.15;
+        window.addEventListener('resize', () => cardObj.updateBounds());
+        window.addEventListener('scroll', () => cardObj.updateBounds(), { passive: true });
+        card.addEventListener('contextmenu', (e) => e.preventDefault());
 
-            card.style.transform = `perspective(800px) rotateX(${currentRotateX.toFixed(2)}deg) rotateY(${currentRotateY.toFixed(2)}deg) scale3d(${currentScale.toFixed(3)}, ${currentScale.toFixed(3)}, ${currentScale.toFixed(3)})`;
+        cardMap.set(card, cardObj);
 
-            if (
-                Math.abs(targetRotateX - currentRotateX) > 0.01 ||
-                Math.abs(targetRotateY - currentRotateY) > 0.01 ||
-                Math.abs(targetScale - currentScale) > 0.001
-            ) {
-                animationFrameId = requestAnimationFrame(animatePhysics);
-            } else {
-                animationFrameId = null;
-            }
-        }
-
-        function startAnimationLoop() {
-            if (!animationFrameId) {
-                animationFrameId = requestAnimationFrame(animatePhysics);
-            }
-        }
-
-        function handlePointerMove(e) {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-            const x = clientX - bounds.left;
-            const y = clientY - bounds.top;
-
-            const centerX = bounds.width / 2;
-            const centerY = bounds.height / 2;
-
-            // Calculate subtle tilt angles max 3.5 deg for minimal tactile feel
-            targetRotateX = ((centerY - y) / centerY) * 3.5;
-            targetRotateY = ((x - centerX) / centerX) * 3.5;
-
-            const pctX = ((x / bounds.width) * 100).toFixed(1);
-            const pctY = ((y / bounds.height) * 100).toFixed(1);
-
-            card.style.setProperty('--touch-x', `${pctX}%`);
-            card.style.setProperty('--touch-y', `${pctY}%`);
-            card.style.setProperty('--touch-opacity', '1');
-
-            startAnimationLoop();
-        }
-
-        function handleTouchStart(e) {
-            updateBounds();
-            card.classList.add('is-touch-pressed');
-            targetScale = 0.99; // Subtle tactile press
-            handlePointerMove(e);
-        }
-
-        function handleTouchEnd() {
-            resetCardState();
-        }
-
-        // On Click/Tap: Immediately reset card state so no animation/popover sticks after click
-        card.addEventListener('click', () => {
-            resetCardState();
-        });
-
-        // Desktop Mouse Events (Fine pointer)
+        // Desktop Pointer Events
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
-                updateBounds();
-                targetScale = 1.008;
-                handlePointerMove(e);
+                cardObj.activate(e.clientX, e.clientY, 1.008);
             });
 
-            card.addEventListener('mousemove', handlePointerMove);
+            card.addEventListener('mousemove', (e) => {
+                cardObj.handleMove(e.clientX, e.clientY);
+            });
 
             card.addEventListener('mouseleave', () => {
-                resetCardState();
+                cardObj.release();
             });
         }
+    });
 
-        // Touch Events & Context Menu Callout Prevention
-        card.addEventListener('contextmenu', (e) => e.preventDefault());
-        card.addEventListener('touchstart', handleTouchStart, { passive: true });
-        card.addEventListener('touchmove', handlePointerMove, { passive: true });
-        card.addEventListener('touchend', handleTouchEnd);
-        card.addEventListener('touchcancel', handleTouchEnd);
+    // Global Mobile Finger Dragging across elements & smooth release
+    window.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
+
+        if (cardEl && cardMap.has(cardEl)) {
+            currentActiveCardObj = cardMap.get(cardEl);
+            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99);
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
+
+        if (cardEl && cardMap.has(cardEl)) {
+            const newCardObj = cardMap.get(cardEl);
+            if (currentActiveCardObj && currentActiveCardObj !== newCardObj) {
+                currentActiveCardObj.release();
+            }
+            currentActiveCardObj = newCardObj;
+            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99);
+        } else if (currentActiveCardObj) {
+            currentActiveCardObj.release();
+            currentActiveCardObj = null;
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+        if (currentActiveCardObj) {
+            currentActiveCardObj.release();
+            currentActiveCardObj = null;
+        }
+    });
+
+    window.addEventListener('touchcancel', () => {
+        if (currentActiveCardObj) {
+            currentActiveCardObj.release();
+            currentActiveCardObj = null;
+        }
     });
 });
