@@ -1,24 +1,24 @@
 /* ==========================================================================
-   HANDCRAFTED BENTO INTERACTIVITY & GOOGLE/ANDROID TACTILE PRESSURE
+   HANDCRAFTED BENTO INTERACTIVITY & HIGH-PERFORMANCE DSA TOUCH ENGINE
    Developer: Sahil
+   Optimization: DSA Spatial Indexing (Zero Layout Reflow on Touch Drag)
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     let lastVibratedCardEl = null;
-    let lastVibratedBtnEl = null;
 
-    // Helper function for mobile haptic feedback
+    // Helper for haptic vibration
     function triggerHaptic(pattern = 40) {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             try {
                 navigator.vibrate(pattern);
             } catch (e) {
-                // Ignore if browser restricts vibration during move
+                // Silently ignore browser security blocks
             }
         }
     }
 
-    // 1. Custom Cursor Logic
+    // 1. Custom Cursor Logic (Desktop Only)
     const cursor = document.getElementById('custom-cursor');
 
     if (cursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
@@ -34,75 +34,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Bento Card 3D Pressure Physics
-    const cardNodes = document.querySelectorAll('.bento-card');
-    const cardMap = new Map();
-    let currentActiveCardObj = null;
+    // ==========================================================================
+    // DSA SPATIAL INDEX ENGINE (O(1) Bounds Lookup - Zero DOM Layout Reflow)
+    // ==========================================================================
+    const cardNodes = Array.from(document.querySelectorAll('.bento-card'));
+    const bentoBtns = Array.from(document.querySelectorAll('.bento-btn'));
 
-    cardNodes.forEach((card) => {
-        const cardObj = {
+    let spatialCards = [];
+    let spatialBtns = [];
+    let currentActiveCardObj = null;
+    let currentActiveBtn = null;
+
+    // Fast Card Physics Controller
+    function createCardController(card) {
+        return {
             card: card,
-            bounds: card.getBoundingClientRect(),
+            bounds: null,
             targetRotateX: 0,
             targetRotateY: 0,
             targetScale: 1,
             currentRotateX: 0,
             currentRotateY: 0,
             currentScale: 1,
-            animationFrameId: null,
+            isDirty: false,
 
-            updateBounds() {
-                this.bounds = this.card.getBoundingClientRect();
+            updateBounds(rect) {
+                this.bounds = rect || this.card.getBoundingClientRect();
             },
 
-            animatePhysics() {
-                this.currentRotateX += (this.targetRotateX - this.currentRotateX) * 0.20;
-                this.currentRotateY += (this.targetRotateY - this.currentRotateY) * 0.20;
-                this.currentScale += (this.targetScale - this.currentScale) * 0.20;
+            stepPhysics() {
+                const lerpFactor = 0.22;
+                this.currentRotateX += (this.targetRotateX - this.currentRotateX) * lerpFactor;
+                this.currentRotateY += (this.targetRotateY - this.currentRotateY) * lerpFactor;
+                this.currentScale += (this.targetScale - this.currentScale) * lerpFactor;
 
-                this.card.style.transform = `perspective(800px) rotateX(${this.currentRotateX.toFixed(2)}deg) rotateY(${this.currentRotateY.toFixed(2)}deg) scale3d(${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)})`;
+                this.card.style.transform = `perspective(800px) rotateX(${this.currentRotateX}deg) rotateY(${this.currentRotateY}deg) scale3d(${this.currentScale}, ${this.currentScale}, ${this.currentScale})`;
 
                 const deltaX = Math.abs(this.targetRotateX - this.currentRotateX);
                 const deltaY = Math.abs(this.targetRotateY - this.currentRotateY);
                 const deltaScale = Math.abs(this.targetScale - this.currentScale);
 
-                if (deltaX > 0.01 || deltaY > 0.01 || deltaScale > 0.001) {
-                    this.animationFrameId = requestAnimationFrame(() => this.animatePhysics());
-                } else {
+                if (deltaX < 0.01 && deltaY < 0.01 && deltaScale < 0.001) {
+                    this.isDirty = false;
                     if (this.targetRotateX === 0 && this.targetRotateY === 0 && this.targetScale === 1) {
                         this.card.style.transform = 'none';
                     }
-                    this.animationFrameId = null;
-                }
-            },
-
-            startAnimationLoop() {
-                if (!this.animationFrameId) {
-                    this.animationFrameId = requestAnimationFrame(() => this.animatePhysics());
+                } else {
+                    this.isDirty = true;
                 }
             },
 
             handleMove(clientX, clientY) {
+                if (!this.bounds) this.updateBounds();
                 const x = clientX - this.bounds.left;
                 const y = clientY - this.bounds.top;
-                const centerX = this.bounds.width / 2;
-                const centerY = this.bounds.height / 2;
+                const centerX = this.bounds.width * 0.5;
+                const centerY = this.bounds.height * 0.5;
 
                 this.targetRotateX = ((centerY - y) / centerY) * 3.5;
                 this.targetRotateY = ((x - centerX) / centerX) * 3.5;
 
-                const pctX = ((x / this.bounds.width) * 100).toFixed(1);
-                const pctY = ((y / this.bounds.height) * 100).toFixed(1);
+                const pctX = (x / this.bounds.width) * 100;
+                const pctY = (y / this.bounds.height) * 100;
 
                 this.card.style.setProperty('--touch-x', `${pctX}%`);
                 this.card.style.setProperty('--touch-y', `${pctY}%`);
                 this.card.style.setProperty('--touch-opacity', '1');
 
-                this.startAnimationLoop();
+                this.isDirty = true;
             },
 
             activate(clientX, clientY, scale = 0.99, isTouch = false) {
-                this.updateBounds();
                 this.card.classList.add('is-touch-pressed');
                 this.targetScale = scale;
                 this.handleMove(clientX, clientY);
@@ -119,17 +121,84 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.targetRotateY = 0;
                 this.targetScale = 1;
                 this.card.style.setProperty('--touch-opacity', '0');
-                this.card.blur();
-                this.startAnimationLoop();
+                this.isDirty = true;
             }
         };
+    }
 
-        window.addEventListener('resize', () => cardObj.updateBounds());
-        window.addEventListener('scroll', () => cardObj.updateBounds(), { passive: true });
+    // Build & Refresh Spatial Cache
+    function refreshSpatialIndex() {
+        spatialCards = cardNodes.map(card => {
+            const rect = card.getBoundingClientRect();
+            const controller = createCardController(card);
+            controller.updateBounds(rect);
+            return {
+                element: card,
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                bottom: rect.bottom,
+                controller: controller
+            };
+        });
+
+        spatialBtns = bentoBtns.map(btn => {
+            const rect = btn.getBoundingClientRect();
+            return {
+                element: btn,
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                bottom: rect.bottom,
+                width: rect.width,
+                height: rect.height
+            };
+        });
+    }
+
+    refreshSpatialIndex();
+    window.addEventListener('resize', refreshSpatialIndex, { passive: true });
+    window.addEventListener('orientationchange', refreshSpatialIndex, { passive: true });
+
+    // Single Global Unified RAF Physics Loop
+    function globalPhysicsLoop() {
+        for (let i = 0; i < spatialCards.length; i++) {
+            const ctrl = spatialCards[i].controller;
+            if (ctrl.isDirty) {
+                ctrl.stepPhysics();
+            }
+        }
+        requestAnimationFrame(globalPhysicsLoop);
+    }
+    requestAnimationFrame(globalPhysicsLoop);
+
+    // O(N) Pure Arithmetic Point-in-Rectangle DSA Lookup (No DOM layout query)
+    function findCardAtPoint(x, y) {
+        for (let i = 0; i < spatialCards.length; i++) {
+            const item = spatialCards[i];
+            if (x >= item.left && x <= item.right && y >= item.top && y <= item.bottom) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    function findBtnAtPoint(x, y) {
+        for (let i = 0; i < spatialBtns.length; i++) {
+            const item = spatialBtns[i];
+            if (x >= item.left && x <= item.right && y >= item.top && y <= item.bottom) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    // Setup Event Listeners for Cards
+    spatialCards.forEach(item => {
+        const card = item.element;
+        const ctrl = item.controller;
+
         card.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        cardMap.set(card, cardObj);
-
         card.addEventListener('pointerdown', (e) => {
             if (e.pointerType === 'touch') {
                 triggerHaptic(40);
@@ -138,94 +207,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
-                cardObj.activate(e.clientX, e.clientY, 1.008, false);
+                ctrl.activate(e.clientX, e.clientY, 1.008, false);
             });
-
             card.addEventListener('mousemove', (e) => {
-                cardObj.handleMove(e.clientX, e.clientY);
+                ctrl.handleMove(e.clientX, e.clientY);
             });
-
             card.addEventListener('mouseleave', () => {
-                cardObj.release();
+                ctrl.release();
             });
         }
     });
 
-    // 3. Apple VisionOS Style Specular Glass Glare for Buttons (.bento-btn)
-    const bentoBtns = document.querySelectorAll('.bento-btn');
-    let currentActiveBtn = null;
-
-    function handleBtnMove(btn, clientX, clientY) {
-        const btnBounds = btn.getBoundingClientRect();
-        const btnX = clientX - btnBounds.left;
-        const btnY = clientY - btnBounds.top;
-        const pctX = ((btnX / btnBounds.width) * 100).toFixed(1);
-        const pctY = ((btnY / btnBounds.height) * 100).toFixed(1);
-
-        btn.style.setProperty('--btn-x', `${pctX}%`);
-        btn.style.setProperty('--btn-y', `${pctY}%`);
-    }
-
-    bentoBtns.forEach((btn) => {
+    // Button Pointer Movement (Desktop)
+    spatialBtns.forEach(item => {
+        const btn = item.element;
         btn.addEventListener('mousemove', (e) => {
-            handleBtnMove(btn, e.clientX, e.clientY);
+            const pctX = ((e.clientX - item.left) / item.width) * 100;
+            const pctY = ((e.clientY - item.top) / item.height) * 100;
+            btn.style.setProperty('--btn-x', `${pctX}%`);
+            btn.style.setProperty('--btn-y', `${pctY}%`);
         });
     });
 
-    // Global Mobile Finger Dragging across cards and buttons
+    // High-Performance Touch Dragging (Zero Layout Reflow)
     window.addEventListener('touchstart', (e) => {
+        refreshSpatialIndex(); // Quick bounds sync on touch start
         const touch = e.touches[0];
-        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-        const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
-        const btnEl = targetEl ? targetEl.closest('.bento-btn') : null;
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
 
-        if (btnEl) {
-            if (currentActiveBtn !== btnEl) {
-                if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
-                currentActiveBtn = btnEl;
-                currentActiveBtn.classList.add('is-btn-active');
-                triggerHaptic(30);
-            }
-            handleBtnMove(btnEl, touch.clientX, touch.clientY);
+        const btnMatch = findBtnAtPoint(touchX, touchY);
+        if (btnMatch) {
+            currentActiveBtn = btnMatch.element;
+            currentActiveBtn.classList.add('is-btn-active');
+            triggerHaptic(30);
         }
 
-        if (cardEl && cardMap.has(cardEl)) {
-            currentActiveCardObj = cardMap.get(cardEl);
-            currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99, true);
+        const cardMatch = findCardAtPoint(touchX, touchY);
+        if (cardMatch) {
+            currentActiveCardObj = cardMatch.controller;
+            currentActiveCardObj.activate(touchX, touchY, 0.99, true);
         }
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
         const touch = e.touches[0];
-        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-        const cardEl = targetEl ? targetEl.closest('.bento-card') : null;
-        const btnEl = targetEl ? targetEl.closest('.bento-btn') : null;
+        const touchX = touch.clientX;
+        const touchY = touch.clientY;
 
-        // Button tracking during drag
-        if (btnEl) {
-            if (currentActiveBtn !== btnEl) {
+        // Button spatial check (Pure arithmetic)
+        const btnMatch = findBtnAtPoint(touchX, touchY);
+        if (btnMatch) {
+            if (currentActiveBtn !== btnMatch.element) {
                 if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
-                currentActiveBtn = btnEl;
+                currentActiveBtn = btnMatch.element;
                 currentActiveBtn.classList.add('is-btn-active');
-                triggerHaptic(30); // Apple button activation pulse
+                triggerHaptic(30);
             }
-            handleBtnMove(btnEl, touch.clientX, touch.clientY);
+            const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
+            const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
+            currentActiveBtn.style.setProperty('--btn-x', `${pctX}%`);
+            currentActiveBtn.style.setProperty('--btn-y', `${pctY}%`);
         } else if (currentActiveBtn) {
             currentActiveBtn.classList.remove('is-btn-active');
             currentActiveBtn = null;
         }
 
-        // Card tracking during drag
-        if (cardEl && cardMap.has(cardEl)) {
-            const newCardObj = cardMap.get(cardEl);
-            if (currentActiveCardObj !== newCardObj) {
-                if (currentActiveCardObj) {
-                    currentActiveCardObj.release();
-                }
-                currentActiveCardObj = newCardObj;
-                currentActiveCardObj.activate(touch.clientX, touch.clientY, 0.99, true);
+        // Card spatial check (Pure arithmetic - zero reflow)
+        const cardMatch = findCardAtPoint(touchX, touchY);
+        if (cardMatch) {
+            const newCtrl = cardMatch.controller;
+            if (currentActiveCardObj !== newCtrl) {
+                if (currentActiveCardObj) currentActiveCardObj.release();
+                currentActiveCardObj = newCtrl;
+                currentActiveCardObj.activate(touchX, touchY, 0.99, true);
             } else {
-                newCardObj.handleMove(touch.clientX, touch.clientY);
+                newCtrl.handleMove(touchX, touchY);
             }
         } else if (currentActiveCardObj) {
             currentActiveCardObj.release();
@@ -244,11 +301,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentActiveBtn = null;
         }
         lastVibratedCardEl = null;
-        lastVibratedBtnEl = null;
     }
 
-    window.addEventListener('touchend', clearTouchState);
-    window.addEventListener('touchcancel', clearTouchState);
+    window.addEventListener('touchend', clearTouchState, { passive: true });
+    window.addEventListener('touchcancel', clearTouchState, { passive: true });
 
     // Live GitHub API Stats Fetcher for KingSahil
     async function fetchGitHubStats() {
@@ -270,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (starsEl) starsEl.textContent = totalStars;
             }
         } catch (err) {
-            // Silently retain pre-filled live values
+            // Retain pre-filled live values
         }
     }
     fetchGitHubStats();
