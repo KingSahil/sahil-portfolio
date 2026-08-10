@@ -12,6 +12,12 @@
     padding: 0;
     box-sizing: border-box;
     cursor: none; /* Custom cursor */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -39,7 +45,7 @@
     --radius-sm: 10px;
     
     --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    --shadow-glow: 0 0 25px rgba(255, 0, 51, 0.25);
+    --shadow-glow: 0 0 14px rgba(255, 0, 51, 0.12);
 }
 
 html, body {
@@ -169,7 +175,7 @@ html, body {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%), rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 65%);
+    background: radial-gradient(circle at var(--touch-x, 50%) var(--touch-y, 50%), rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 45%);
     opacity: var(--touch-opacity, 0);
     pointer-events: none;
     transition: opacity 0.25s ease;
@@ -248,11 +254,18 @@ html, body {
 }
 
 /* Show funny popover on card hover & mobile touch press */
-.bento-social:hover .funny-popover,
-.bento-social.is-touch-pressed .funny-popover {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-22px) rotate(-3deg) scale(1);
+.bento-card:hover .funny-popover,
+.bento-card.is-touch-pressed .funny-popover {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(-22px) rotate(-3deg) scale(1) !important;
 }
+
+.bento-skills .funny-popover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 229, 255, 0.4);
+}
+.bento-skills .funny-popover::after { border-top-color: var(--accent-cyan); }
 
 /* Brand Custom Accents for Popover */
 .card-discord .funny-popover {
@@ -684,6 +697,7 @@ html, body {
     .bento-card {
         padding: 0.65rem 0.75rem;
         border-radius: 16px;
+        overflow: visible !important;
     }
 
     /* 1. Hero Card on Mobile */
@@ -842,3 +856,19 @@ html, body {
         font-size: 0.7rem;
     }
 }
+
+/* Disable sticky hover highlights on touch devices when tapping/clicking links, but allow touch press popover */
+@media (hover: none) {
+    .bento-card:not(.is-touch-pressed):hover {
+        transform: none;
+        border-color: var(--card-border);
+        background: var(--card-bg);
+        box-shadow: var(--shadow-card);
+    }
+
+    .bento-card:not(.is-touch-pressed):hover .funny-popover {
+        opacity: 0 !important;
+        transform: translateX(-50%) translateY(4px) rotate(-4deg) scale(0.85) !important;
+    }
+}
+

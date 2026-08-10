@@ -40,15 +40,30 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', updateBounds);
         window.addEventListener('scroll', updateBounds, { passive: true });
 
+        function resetCardState() {
+            card.classList.remove('is-touch-pressed');
+            targetRotateX = 0;
+            targetRotateY = 0;
+            targetScale = 1;
+            currentRotateX = 0;
+            currentRotateY = 0;
+            currentScale = 1;
+            card.style.setProperty('--touch-opacity', '0');
+            card.style.transform = 'none';
+            card.blur();
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
         function animatePhysics() {
-            // Smooth spring lerp interpolation (0.15 dampening for buttery smooth Android motion)
             currentRotateX += (targetRotateX - currentRotateX) * 0.15;
             currentRotateY += (targetRotateY - currentRotateY) * 0.15;
             currentScale += (targetScale - currentScale) * 0.15;
 
             card.style.transform = `perspective(800px) rotateX(${currentRotateX.toFixed(2)}deg) rotateY(${currentRotateY.toFixed(2)}deg) scale3d(${currentScale.toFixed(3)}, ${currentScale.toFixed(3)}, ${currentScale.toFixed(3)})`;
 
-            // Continue animation loop while moving/pressed
             if (
                 Math.abs(targetRotateX - currentRotateX) > 0.01 ||
                 Math.abs(targetRotateY - currentRotateY) > 0.01 ||
@@ -66,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle Pointer/Touch Drag & Move Pressure
         function handlePointerMove(e) {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -77,11 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const centerX = bounds.width / 2;
             const centerY = bounds.height / 2;
 
-            // Calculate tilt angles max 12 deg
-            targetRotateX = ((centerY - y) / centerY) * 10;
-            targetRotateY = ((x - centerX) / centerX) * 10;
+            // Calculate subtle tilt angles max 3.5 deg for minimal tactile feel
+            targetRotateX = ((centerY - y) / centerY) * 3.5;
+            targetRotateY = ((x - centerX) / centerX) * 3.5;
 
-            // Set radial light position custom CSS property
             const pctX = ((x / bounds.width) * 100).toFixed(1);
             const pctY = ((y / bounds.height) * 100).toFixed(1);
 
@@ -92,43 +105,42 @@ document.addEventListener('DOMContentLoaded', () => {
             startAnimationLoop();
         }
 
-        function handlePressStart(e) {
+        function handleTouchStart(e) {
             updateBounds();
             card.classList.add('is-touch-pressed');
-            targetScale = 0.97; // Tactical pressure press down
+            targetScale = 0.99; // Subtle tactile press
             handlePointerMove(e);
         }
 
-        function handlePressEnd() {
-            card.classList.remove('is-touch-pressed');
-            targetRotateX = 0;
-            targetRotateY = 0;
-            targetScale = 1;
-            card.style.setProperty('--touch-opacity', '0');
-            startAnimationLoop();
+        function handleTouchEnd() {
+            resetCardState();
         }
 
-        // Desktop Mouse Events
-        card.addEventListener('mouseenter', (e) => {
-            updateBounds();
-            targetScale = 1.02;
-            handlePointerMove(e);
+        // On Click/Tap: Immediately reset card state so no animation/popover sticks after click
+        card.addEventListener('click', () => {
+            resetCardState();
         });
 
-        card.addEventListener('mousemove', handlePointerMove);
+        // Desktop Mouse Events (Fine pointer)
+        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            card.addEventListener('mouseenter', (e) => {
+                updateBounds();
+                targetScale = 1.008;
+                handlePointerMove(e);
+            });
 
-        card.addEventListener('mouseleave', handlePressEnd);
+            card.addEventListener('mousemove', handlePointerMove);
 
-        // Mobile Touch Events (Finger Slide & Hold)
-        card.addEventListener('touchstart', (e) => {
-            handlePressStart(e);
-        }, { passive: true });
+            card.addEventListener('mouseleave', () => {
+                resetCardState();
+            });
+        }
 
-        card.addEventListener('touchmove', (e) => {
-            handlePointerMove(e);
-        }, { passive: true });
-
-        card.addEventListener('touchend', handlePressEnd);
-        card.addEventListener('touchcancel', handlePressEnd);
+        // Touch Events & Context Menu Callout Prevention
+        card.addEventListener('contextmenu', (e) => e.preventDefault());
+        card.addEventListener('touchstart', handleTouchStart, { passive: true });
+        card.addEventListener('touchmove', handlePointerMove, { passive: true });
+        card.addEventListener('touchend', handleTouchEnd);
+        card.addEventListener('touchcancel', handleTouchEnd);
     });
 });
