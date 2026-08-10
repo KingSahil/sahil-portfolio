@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.currentRotateY += (this.targetRotateY - this.currentRotateY) * lerpFactor;
                 this.currentScale += (this.targetScale - this.currentScale) * lerpFactor;
 
-                this.card.style.transform = `perspective(800px) rotateX(${this.currentRotateX}deg) rotateY(${this.currentRotateY}deg) scale3d(${this.currentScale}, ${this.currentScale}, ${this.currentScale})`;
+                this.card.style.transform = `perspective(1000px) rotateX(${this.currentRotateX}deg) rotateY(${this.currentRotateY}deg) scale3d(${this.currentScale}, ${this.currentScale}, ${this.currentScale})`;
 
                 const deltaX = Math.abs(this.targetRotateX - this.currentRotateX);
                 const deltaY = Math.abs(this.targetRotateY - this.currentRotateY);
@@ -91,8 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const centerX = this.bounds.width * 0.5;
                 const centerY = this.bounds.height * 0.5;
 
-                this.targetRotateX = ((centerY - y) / centerY) * 3.5;
-                this.targetRotateY = ((x - centerX) / centerX) * 3.5;
+                // Normalize 3D tilt across card dimensions so physical edge lift is identical for all cards
+                const baseSize = 220;
+                const normX = Math.min(1, baseSize / Math.max(1, this.bounds.width));
+                const normY = Math.min(1, baseSize / Math.max(1, this.bounds.height));
+                const maxAngle = 2.4;
+
+                this.targetRotateX = ((centerY - y) / centerY) * maxAngle * normY;
+                this.targetRotateY = ((x - centerX) / centerX) * maxAngle * normX;
 
                 const pctX = (x / this.bounds.width) * 100;
                 const pctY = (y / this.bounds.height) * 100;
