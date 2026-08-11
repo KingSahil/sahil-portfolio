@@ -194,11 +194,16 @@ html, body {
 }
 
 .bento-card.is-held {
-    z-index: 50 !important;
-    border-color: rgba(255, 0, 51, 0.5) !important;
-    background: rgba(26, 36, 56, 0.95) !important;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 0, 51, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    z-index: 100 !important;
+    border-color: rgba(0, 229, 255, 0.6) !important;
+    background: rgba(20, 30, 50, 0.95) !important;
+    box-shadow: 0 30px 65px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 229, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
     cursor: grabbing !important;
+}
+
+.bento-card.is-repelled {
+    z-index: 20;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .bento-card.is-displaced {
