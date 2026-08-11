@@ -114,91 +114,191 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(stepMarqueeLoop);
 
     // ==========================================================================
-    // DSA SPATIAL INDEX ENGINE (O(1) Bounds Lookup - Zero DOM Layout Reflow)
+    // DSA SPATIAL INDEX ENGINE & COLLISION PHYSICS ENGINE
     // ==========================================================================
     const cardNodes = Array.from(document.querySelectorAll('.bento-card'));
     const bentoBtns = Array.from(document.querySelectorAll('.bento-btn'));
 
     let spatialCards = [];
     let spatialBtns = [];
-    let currentActiveCardObj = null;
+    let activeHeldController = null;
     let currentActiveBtn = null;
 
-    // Fast Card Physics Controller
+    // Fast Card Physics Controller (Tilt, Translation, Momentum & Elastic Recoil)
     function createCardController(card) {
         return {
             card: card,
-            bounds: null,
+            restLeft: undefined,
+            restTop: undefined,
+            width: 0,
+            height: 0,
+
+            // 3D Tilt parameters
             targetRotateX: 0,
             targetRotateY: 0,
             targetScale: 1,
             currentRotateX: 0,
             currentRotateY: 0,
             currentScale: 1,
+
+            // 2D Physics position, velocity, and rotation
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            rz: 0,
+            vrz: 0,
+
+            // Holding state
+            isHeld: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            cardStartX: 0,
+            cardStartY: 0,
+            lastMouseX: 0,
+            lastMouseY: 0,
+            dragDistance: 0,
+
+            // Spring Hooke's Law constants (elastic bounce & damping)
+            kSpring: 0.15,
+            kDamp: 0.78,
+            kRotSpring: 0.12,
+            kRotDamp: 0.75,
+
             isDirty: false,
 
             updateBounds(rect) {
-                this.bounds = rect || this.card.getBoundingClientRect();
+                rect = rect || this.card.getBoundingClientRect();
+                this.restLeft = rect.left - this.x;
+                this.restTop = rect.top - this.y;
+                this.width = rect.width;
+                this.height = rect.height;
+            },
+
+            // Center coordinates in viewport space with active physical displacement
+            getCenter() {
+                if (this.restLeft === undefined) this.updateBounds();
+                return {
+                    x: this.restLeft + this.width * 0.5 + this.x,
+                    y: this.restTop + this.height * 0.5 + this.y,
+                    radius: Math.min(this.width, this.height) * 0.46
+                };
             },
 
             stepPhysics() {
+                // Smooth 3D tilt lerp
                 const lerpFactor = 0.22;
                 this.currentRotateX += (this.targetRotateX - this.currentRotateX) * lerpFactor;
                 this.currentRotateY += (this.targetRotateY - this.currentRotateY) * lerpFactor;
                 this.currentScale += (this.targetScale - this.currentScale) * lerpFactor;
 
-                this.card.style.transform = `perspective(1000px) rotateX(${this.currentRotateX}deg) rotateY(${this.currentRotateY}deg) scale3d(${this.currentScale}, ${this.currentScale}, ${this.currentScale})`;
+                if (this.isHeld) {
+                    // Calculate instantaneous drag velocity
+                    const dtVx = this.x - (this.lastFrameX !== undefined ? this.lastFrameX : this.x);
+                    const dtVy = this.y - (this.lastFrameY !== undefined ? this.lastFrameY : this.y);
+                    this.vx = this.vx * 0.4 + dtVx * 0.6;
+                    this.vy = this.vy * 0.4 + dtVy * 0.6;
+                    this.lastFrameX = this.x;
+                    this.lastFrameY = this.y;
 
-                const deltaX = Math.abs(this.targetRotateX - this.currentRotateX);
-                const deltaY = Math.abs(this.targetRotateY - this.currentRotateY);
-                const deltaScale = Math.abs(this.targetScale - this.currentScale);
-
-                if (deltaX < 0.01 && deltaY < 0.01 && deltaScale < 0.001) {
-                    this.isDirty = false;
-                    if (this.targetRotateX === 0 && this.targetRotateY === 0 && this.targetScale === 1) {
-                        this.card.style.transform = 'none';
-                    }
-                } else {
+                    // Dynamic rotation tilt along drag velocity vector
+                    this.rz += (this.vx * 0.4 - this.rz) * 0.25;
                     this.isDirty = true;
+                } else {
+                    // Free Motion: Hooke's Law Spring Restoring Force (-k*x - d*v)
+                    const fx = -this.kSpring * this.x - (1 - this.kDamp) * this.vx;
+                    const fy = -this.kSpring * this.y - (1 - this.kDamp) * this.vy;
+                    const frz = -this.kRotSpring * this.rz - (1 - this.kRotDamp) * this.vrz;
+
+                    this.vx += fx;
+                    this.vy += fy;
+                    this.vrz += frz;
+
+                    this.vx *= this.kDamp;
+                    this.vy *= this.kDamp;
+                    this.vrz *= this.kRotDamp;
+
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.rz += this.vrz;
+                }
+
+                // Elastic stretch deformation when moving at high speeds
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                let stretchX = 1;
+                let stretchY = 1;
+                if (speed > 0.4) {
+                    const angle = Math.atan2(this.vy, this.vx);
+                    const stretchFactor = Math.min(0.18, speed * 0.007);
+                    stretchX = 1 + Math.abs(Math.cos(angle)) * stretchFactor;
+                    stretchY = 1 + Math.abs(Math.sin(angle)) * stretchFactor;
+                }
+
+                const hasDisplacement = Math.abs(this.x) > 0.04 || Math.abs(this.y) > 0.04 || Math.abs(this.rz) > 0.04;
+                const hasMotion = Math.abs(this.vx) > 0.04 || Math.abs(this.vy) > 0.04 || Math.abs(this.vrz) > 0.04;
+
+                if (hasDisplacement || hasMotion || this.isHeld) {
+                    this.card.classList.add('is-displaced');
+                    this.card.style.transform = `perspective(1000px) translate3d(${this.x.toFixed(2)}px, ${this.y.toFixed(2)}px, 0px) rotateX(${this.currentRotateX.toFixed(2)}deg) rotateY(${this.currentRotateY.toFixed(2)}deg) rotateZ(${this.rz.toFixed(2)}deg) scale3d(${(this.currentScale * stretchX).toFixed(3)}, ${(this.currentScale * stretchY).toFixed(3)}, 1)`;
+                    this.isDirty = true;
+                } else {
+                    this.card.classList.remove('is-displaced');
+                    this.x = 0;
+                    this.y = 0;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.rz = 0;
+                    this.vrz = 0;
+
+                    const deltaX = Math.abs(this.targetRotateX - this.currentRotateX);
+                    const deltaY = Math.abs(this.targetRotateY - this.currentRotateY);
+                    const deltaScale = Math.abs(this.targetScale - this.currentScale);
+
+                    if (deltaX < 0.01 && deltaY < 0.01 && deltaScale < 0.001) {
+                        this.isDirty = false;
+                        if (this.targetRotateX === 0 && this.targetRotateY === 0 && this.targetScale === 1) {
+                            this.card.style.transform = 'none';
+                        }
+                    } else {
+                        this.card.style.transform = `perspective(1000px) rotateX(${this.currentRotateX.toFixed(2)}deg) rotateY(${this.currentRotateY.toFixed(2)}deg) scale3d(${this.currentScale.toFixed(3)}, ${this.currentScale.toFixed(3)}, 1)`;
+                        this.isDirty = true;
+                    }
                 }
             },
 
             handleMove(clientX, clientY) {
-                if (!this.bounds) this.updateBounds();
-                const x = clientX - this.bounds.left;
-                const y = clientY - this.bounds.top;
-                const centerX = this.bounds.width * 0.5;
-                const centerY = this.bounds.height * 0.5;
+                if (this.restLeft === undefined) this.updateBounds();
+                const cardLeft = this.restLeft + this.x;
+                const cardTop = this.restTop + this.y;
+                const x = clientX - cardLeft;
+                const y = clientY - cardTop;
+                const centerX = this.width * 0.5;
+                const centerY = this.height * 0.5;
 
-                // Responsive tilt scaling with enhanced left/right (Y-axis) tilt responsiveness
                 const isMobile = window.innerWidth <= 768;
                 const maxAngleX = isMobile ? 3.6 : 2.8;
-                const maxAngleY = isMobile ? 5.6 : 4.8; // Boosted left/right tilt
+                const maxAngleY = isMobile ? 5.6 : 4.8;
 
                 this.targetRotateX = ((centerY - y) / centerY) * maxAngleX;
                 this.targetRotateY = ((x - centerX) / centerX) * maxAngleY;
 
-                const pctX = (x / this.bounds.width) * 100;
-                const pctY = (y / this.bounds.height) * 100;
+                const pctX = (x / this.width) * 100;
+                const pctY = (y / this.height) * 100;
 
                 this.card.style.setProperty('--touch-x', `${pctX}%`);
                 this.card.style.setProperty('--touch-y', `${pctY}%`);
                 this.card.style.setProperty('--touch-opacity', '1');
 
-                // Absolute Spatial Positioning Acceleration (Holding Left or Right)
                 if (this.card.classList.contains('bento-tech-marquee')) {
                     if (pctX < 45) {
-                        // Holding/resting on LEFT side: Top row (moving left) speeds up!
                         const intensity = Math.min(1, (45 - pctX) / 45);
-                        targetSpeedTop = baseSpeed + (intensity * 0.9); // Subtle boost from 0.55 to 1.45px/frame
+                        targetSpeedTop = baseSpeed + (intensity * 0.9);
                         targetSpeedBottom = baseSpeed;
                     } else if (pctX > 55) {
-                        // Holding/resting on RIGHT side: Bottom row (moving right) speeds up!
                         const intensity = Math.min(1, (pctX - 55) / 45);
-                        targetSpeedBottom = baseSpeed + (intensity * 0.9); // Subtle boost from 0.55 to 1.45px/frame
+                        targetSpeedBottom = baseSpeed + (intensity * 0.9);
                         targetSpeedTop = baseSpeed;
                     } else {
-                        // Resting in middle (45% to 55%): Base speed!
                         targetSpeedTop = baseSpeed;
                         targetSpeedBottom = baseSpeed;
                     }
@@ -217,7 +317,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.handleMove(clientX, clientY);
             },
 
+            startHold(clientX, clientY) {
+                this.isHeld = true;
+                this.dragStartX = clientX;
+                this.dragStartY = clientY;
+                this.cardStartX = this.x;
+                this.cardStartY = this.y;
+                this.lastMouseX = clientX;
+                this.lastMouseY = clientY;
+                this.lastFrameX = this.x;
+                this.lastFrameY = this.y;
+                this.dragDistance = 0;
+                this.card.classList.add('is-held');
+                this.isDirty = true;
+            },
+
+            dragHold(clientX, clientY) {
+                if (!this.isHeld) return;
+                const dx = clientX - this.dragStartX;
+                const dy = clientY - this.dragStartY;
+                const stepDist = Math.sqrt((clientX - this.lastMouseX) ** 2 + (clientY - this.lastMouseY) ** 2);
+                this.dragDistance += stepDist;
+
+                this.x = this.cardStartX + dx;
+                this.y = this.cardStartY + dy;
+
+                this.lastMouseX = clientX;
+                this.lastMouseY = clientY;
+                this.isDirty = true;
+            },
+
+            releaseHold() {
+                if (!this.isHeld) return;
+                this.isHeld = false;
+                this.card.classList.remove('is-held');
+                this.card.classList.remove('is-touch-pressed');
+                this.targetRotateX = 0;
+                this.targetRotateY = 0;
+                this.targetScale = 1;
+                this.card.style.setProperty('--touch-opacity', '0');
+
+                if (this.card.classList.contains('bento-tech-marquee')) {
+                    isHoldingTechCard = false;
+                    targetSpeedTop = baseSpeed;
+                    targetSpeedBottom = baseSpeed;
+                }
+
+                // Impart drag momentum impulse
+                this.vx = (this.vx || 0) * 1.3;
+                this.vy = (this.vy || 0) * 1.3;
+                this.vrz = (this.vx || 0) * 0.45;
+                this.isDirty = true;
+            },
+
             release() {
+                if (this.isHeld) {
+                    this.releaseHold();
+                    return;
+                }
                 this.card.classList.remove('is-touch-pressed');
                 this.targetRotateX = 0;
                 this.targetRotateY = 0;
@@ -236,15 +393,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Build & Refresh Spatial Cache
     function refreshSpatialIndex() {
         spatialCards = cardNodes.map(card => {
-            const rect = card.getBoundingClientRect();
-            const controller = createCardController(card);
-            controller.updateBounds(rect);
+            let controller = card._controller;
+            if (!controller) {
+                controller = createCardController(card);
+                card._controller = controller;
+            }
+            controller.updateBounds();
             return {
                 element: card,
-                left: rect.left,
-                right: rect.right,
-                top: rect.top,
-                bottom: rect.bottom,
                 controller: controller
             };
         });
@@ -267,11 +423,86 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', refreshSpatialIndex, { passive: true });
     window.addEventListener('orientationchange', refreshSpatialIndex, { passive: true });
 
+    // O(N^2) Physics Collision Resolver with Momentum Transfer & Push Impulse
+    function resolveCardCollisions() {
+        for (let i = 0; i < spatialCards.length; i++) {
+            const ctrlA = spatialCards[i].controller;
+            const centerA = ctrlA.getCenter();
+
+            for (let j = i + 1; j < spatialCards.length; j++) {
+                const ctrlB = spatialCards[j].controller;
+                const centerB = ctrlB.getCenter();
+
+                const dx = centerB.x - centerA.x;
+                const dy = centerB.y - centerA.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                const minDistance = centerA.radius + centerB.radius;
+
+                if (dist < minDistance && dist > 0.001) {
+                    const overlap = minDistance - dist;
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+
+                    const pushFactor = 0.55;
+
+                    if (ctrlA.isHeld && !ctrlB.isHeld) {
+                        ctrlB.x += nx * overlap * pushFactor;
+                        ctrlB.y += ny * overlap * pushFactor;
+                        ctrlB.vx += nx * overlap * 0.35 + ctrlA.vx * 0.35;
+                        ctrlB.vy += ny * overlap * 0.35 + ctrlA.vy * 0.35;
+                        ctrlB.vrz += (nx * ny) * 0.6;
+                        ctrlB.isDirty = true;
+                        if (overlap > 12) triggerHaptic(20);
+                    } else if (ctrlB.isHeld && !ctrlA.isHeld) {
+                        ctrlA.x -= nx * overlap * pushFactor;
+                        ctrlA.y -= ny * overlap * pushFactor;
+                        ctrlA.vx -= nx * overlap * 0.35 - ctrlB.vx * 0.35;
+                        ctrlA.vy -= ny * overlap * 0.35 - ctrlB.vy * 0.35;
+                        ctrlA.vrz -= (nx * ny) * 0.6;
+                        ctrlA.isDirty = true;
+                        if (overlap > 12) triggerHaptic(20);
+                    } else {
+                        // Free-moving elastic collision
+                        const split = overlap * 0.45;
+                        ctrlA.x -= nx * split;
+                        ctrlA.y -= ny * split;
+                        ctrlB.x += nx * split;
+                        ctrlB.y += ny * split;
+
+                        const relVx = ctrlB.vx - ctrlA.vx;
+                        const relVy = ctrlB.vy - ctrlA.vy;
+                        const velAlongNormal = relVx * nx + relVy * ny;
+
+                        if (velAlongNormal < 0) {
+                            const restitution = 0.65;
+                            const impulseScalar = -(1 + restitution) * velAlongNormal * 0.5;
+                            const impX = impulseScalar * nx;
+                            const impY = impulseScalar * ny;
+
+                            ctrlA.vx -= impX;
+                            ctrlA.vy -= impY;
+                            ctrlB.vx += impX;
+                            ctrlB.vy += impY;
+
+                            ctrlA.vrz -= impX * 0.25;
+                            ctrlB.vrz += impX * 0.25;
+                        }
+                        ctrlA.isDirty = true;
+                        ctrlB.isDirty = true;
+                    }
+                }
+            }
+        }
+    }
+
     // Single Global Unified RAF Physics Loop
     function globalPhysicsLoop() {
+        resolveCardCollisions();
+
         for (let i = 0; i < spatialCards.length; i++) {
             const ctrl = spatialCards[i].controller;
-            if (ctrl.isDirty) {
+            if (ctrl.isDirty || ctrl.isHeld) {
                 ctrl.stepPhysics();
             }
         }
@@ -282,9 +513,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // O(N) Pure Arithmetic Point-in-Rectangle DSA Lookup
     function findCardAtPoint(x, y) {
         for (let i = 0; i < spatialCards.length; i++) {
-            const item = spatialCards[i];
-            if (x >= item.left && x <= item.right && y >= item.top && y <= item.bottom) {
-                return item;
+            const ctrl = spatialCards[i].controller;
+            if (ctrl.restLeft === undefined) ctrl.updateBounds();
+            const currentLeft = ctrl.restLeft + ctrl.x;
+            const currentTop = ctrl.restTop + ctrl.y;
+            const currentRight = currentLeft + ctrl.width;
+            const currentBottom = currentTop + ctrl.height;
+            if (x >= currentLeft && x <= currentRight && y >= currentTop && y <= currentBottom) {
+                return spatialCards[i];
             }
         }
         return null;
@@ -300,22 +536,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // Setup Event Listeners for Cards
+    // Setup Listeners for All Cards (Link cards & Static cards)
     spatialCards.forEach(item => {
         const card = item.element;
         const ctrl = item.controller;
 
         card.addEventListener('contextmenu', (e) => e.preventDefault());
+        card.addEventListener('dragstart', (e) => e.preventDefault());
+
+        // Direct PointerDown Handler for instant response on all card types (<a> links and <article>)
+        card.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.bento-btn')) return;
+
+            activeHeldController = ctrl;
+            ctrl.startHold(e.clientX, e.clientY);
+            ctrl.activate(e.clientX, e.clientY, 0.98);
+            triggerHaptic(40);
+
+            try {
+                card.setPointerCapture(e.pointerId);
+            } catch (err) {}
+        });
 
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
             card.addEventListener('mouseenter', (e) => {
-                ctrl.activate(e.clientX, e.clientY, 1.008);
+                if (!ctrl.isHeld) ctrl.activate(e.clientX, e.clientY, 1.008);
             });
             card.addEventListener('mousemove', (e) => {
-                ctrl.handleMove(e.clientX, e.clientY);
+                if (!ctrl.isHeld) ctrl.handleMove(e.clientX, e.clientY);
             });
             card.addEventListener('mouseleave', () => {
-                ctrl.release();
+                if (!ctrl.isHeld) ctrl.release();
             });
         }
     });
@@ -332,99 +583,59 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // High-Performance Touch Dragging (Zero Layout Reflow)
-    window.addEventListener('touchstart', (e) => {
-        refreshSpatialIndex();
-        const touch = e.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-
-        const btnMatch = findBtnAtPoint(touchX, touchY);
-        if (btnMatch) {
-            currentActiveBtn = btnMatch.element;
-            currentActiveBtn.classList.add('is-btn-active');
-            const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
-            const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
-            currentActiveBtn.style.setProperty('--btn-x', `${pctX}%`);
-            currentActiveBtn.style.setProperty('--btn-y', `${pctY}%`);
-            triggerHaptic(30);
+    // Global Pointer Movement & Release Handlers
+    window.addEventListener('pointermove', (e) => {
+        if (activeHeldController && activeHeldController.isHeld) {
+            activeHeldController.dragHold(e.clientX, e.clientY);
+            activeHeldController.handleMove(e.clientX, e.clientY);
         }
 
-        const cardMatch = findCardAtPoint(touchX, touchY);
-        if (cardMatch) {
-            currentActiveCardObj = cardMatch.controller;
-            currentActiveCardObj.activate(touchX, touchY, 0.99);
-            lastVibratedCardEl = cardMatch.element;
-            triggerHaptic(45);
-        }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-        const touch = e.touches[0];
-        const touchX = touch.clientX;
-        const touchY = touch.clientY;
-
-        // Button spatial check
-        const btnMatch = findBtnAtPoint(touchX, touchY);
+        // Button hover checks
+        const btnMatch = findBtnAtPoint(e.clientX, e.clientY);
         if (btnMatch) {
             if (currentActiveBtn !== btnMatch.element) {
                 if (currentActiveBtn) currentActiveBtn.classList.remove('is-btn-active');
                 currentActiveBtn = btnMatch.element;
                 currentActiveBtn.classList.add('is-btn-active');
-                triggerHaptic(30);
             }
-            const pctX = ((touchX - btnMatch.left) / btnMatch.width) * 100;
-            const pctY = ((touchY - btnMatch.top) / btnMatch.height) * 100;
+            const pctX = ((e.clientX - btnMatch.left) / btnMatch.width) * 100;
+            const pctY = ((e.clientY - btnMatch.top) / btnMatch.height) * 100;
             currentActiveBtn.style.setProperty('--btn-x', `${pctX}%`);
             currentActiveBtn.style.setProperty('--btn-y', `${pctY}%`);
         } else if (currentActiveBtn) {
             currentActiveBtn.classList.remove('is-btn-active');
             currentActiveBtn = null;
         }
-
-        // Card spatial check - Instant sliding haptic trigger on card crossing
-        const cardMatch = findCardAtPoint(touchX, touchY);
-        if (cardMatch) {
-            const newCtrl = cardMatch.controller;
-            if (currentActiveCardObj !== newCtrl) {
-                if (currentActiveCardObj) currentActiveCardObj.release();
-                currentActiveCardObj = newCtrl;
-                currentActiveCardObj.activate(touchX, touchY, 0.99);
-
-                if (lastVibratedCardEl !== cardMatch.element) {
-                    lastVibratedCardEl = cardMatch.element;
-                    triggerHaptic(35);
-                }
-            } else {
-                newCtrl.handleMove(touchX, touchY);
-            }
-        } else if (currentActiveCardObj) {
-            currentActiveCardObj.release();
-            currentActiveCardObj = null;
-            lastVibratedCardEl = null;
-        }
     }, { passive: true });
 
-    function clearTouchState() {
+    function handlePointerRelease(e) {
+        if (activeHeldController) {
+            const dragDist = activeHeldController.dragDistance;
+            activeHeldController.releaseHold();
+
+            // Intercept click navigation if card was held and dragged (> 6px movement)
+            if (dragDist > 6) {
+                const preventClickOnce = (clickEvent) => {
+                    clickEvent.preventDefault();
+                    clickEvent.stopPropagation();
+                    window.removeEventListener('click', preventClickOnce, true);
+                };
+                window.addEventListener('click', preventClickOnce, true);
+            }
+
+            activeHeldController = null;
+        }
+
         bentoBtns.forEach(btn => {
             btn.classList.remove('is-btn-active');
             btn.style.setProperty('--btn-shine-opacity', '0');
         });
-        if (currentActiveCardObj) {
-            currentActiveCardObj.release();
-            currentActiveCardObj = null;
-        }
         currentActiveBtn = null;
-        isHoldingTechCard = false;
-        targetSpeedTop = baseSpeed;
-        targetSpeedBottom = baseSpeed;
         lastVibratedCardEl = null;
     }
 
-    window.addEventListener('touchend', clearTouchState, { passive: true });
-    window.addEventListener('touchcancel', clearTouchState, { passive: true });
-    window.addEventListener('pointerup', clearTouchState, { passive: true });
-    window.addEventListener('pointercancel', clearTouchState, { passive: true });
+    window.addEventListener('pointerup', handlePointerRelease, { passive: true });
+    window.addEventListener('pointercancel', handlePointerRelease, { passive: true });
 
     // Live GitHub API Stats Fetcher for KingSahil
     async function fetchGitHubStats() {

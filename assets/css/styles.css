@@ -166,8 +166,10 @@ html, body {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: transform;
-    transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.15s ease,
+    -webkit-user-drag: none;
+    user-drag: none;
+    touch-action: none;
+    transition: border-color 0.15s ease,
                 background-color 0.15s ease,
                 box-shadow 0.15s ease;
 }
@@ -189,6 +191,18 @@ html, body {
     background: var(--card-bg-hover);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     --touch-opacity: 1;
+}
+
+.bento-card.is-held {
+    z-index: 50 !important;
+    border-color: rgba(255, 0, 51, 0.5) !important;
+    background: rgba(26, 36, 56, 0.95) !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 0, 51, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    cursor: grabbing !important;
+}
+
+.bento-card.is-displaced {
+    z-index: 10;
 }
 
 
