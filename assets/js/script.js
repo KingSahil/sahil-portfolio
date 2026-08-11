@@ -839,27 +839,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // ==========================================================================
-    // ABOUT ME EXPANDED MODAL OVERLAY ENGINE
+    // ABOUT ME EXPANDED MODAL OVERLAY & FLIP MORPHING ENGINE
     // ==========================================================================
     const modalBackdrop = document.getElementById('about-modal');
+    const modalContainer = document.querySelector('.modal-container');
     const modalCloseBtn = document.getElementById('modal-close-btn');
+    const heroCard = document.querySelector('.bento-hero');
+
+    let isModalAnimating = false;
 
     function openAboutModal() {
-        if (modalBackdrop) {
-            isModalOpen = true;
-            document.body.classList.add('modal-active');
-            modalBackdrop.classList.add('is-open');
-            modalBackdrop.setAttribute('aria-hidden', 'false');
-            triggerHaptic([30, 50, 30]);
+        if (!modalBackdrop || !modalContainer || isModalAnimating) return;
+        isModalAnimating = true;
+
+        isModalOpen = true;
+        document.body.classList.add('modal-active');
+
+        // Set initial backdrop states
+        modalBackdrop.style.transition = 'none';
+        modalBackdrop.style.opacity = '0';
+        modalBackdrop.classList.add('is-open');
+        modalBackdrop.setAttribute('aria-hidden', 'false');
+        triggerHaptic([30, 50, 30]);
+
+        if (heroCard) {
+            const heroRect = heroCard.getBoundingClientRect();
+            
+            // Measure centered modal size without transition
+            modalContainer.style.transition = 'none';
+            modalContainer.style.opacity = '0.9';
+            const modalRect = modalContainer.getBoundingClientRect();
+
+            // Calculate FLIP deltas
+            const deltaX = (heroRect.left + heroRect.width / 2) - (modalRect.left + modalRect.width / 2);
+            const deltaY = (heroRect.top + heroRect.height / 2) - (modalRect.top + modalRect.height / 2);
+            const scaleX = heroRect.width / modalRect.width;
+            const scaleY = heroRect.height / modalRect.height;
+
+            // Invert: Position modal container directly over hero card
+            modalContainer.style.transform = `translate3d(${deltaX.toFixed(2)}px, ${deltaY.toFixed(2)}px, 0) scale(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)})`;
+            
+            // Force browser layout reflow
+            void modalContainer.offsetWidth;
+
+            // Fade backdrop opacity in sync with container expand transform (0.24s)
+            modalBackdrop.style.transition = 'opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1)';
+            modalBackdrop.style.opacity = '1';
+
+            modalContainer.style.transition = 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease';
+            modalContainer.style.transform = 'translate3d(0, 0, 0) scale(1, 1)';
+            modalContainer.style.opacity = '1';
+
+            setTimeout(() => {
+                isModalAnimating = false;
+            }, 240);
+        } else {
+            modalBackdrop.style.opacity = '1';
+            isModalAnimating = false;
         }
     }
 
     function closeAboutModal() {
-        if (modalBackdrop) {
+        if (!modalBackdrop || !modalContainer || isModalAnimating) return;
+        isModalAnimating = true;
+
+        if (heroCard) {
+            const heroRect = heroCard.getBoundingClientRect();
+            const modalRect = modalContainer.getBoundingClientRect();
+
+            const deltaX = (heroRect.left + heroRect.width / 2) - (modalRect.left + modalRect.width / 2);
+            const deltaY = (heroRect.top + heroRect.height / 2) - (modalRect.top + modalRect.height / 2);
+            const scaleX = heroRect.width / modalRect.width;
+            const scaleY = heroRect.height / modalRect.height;
+
+            // Synchronize backdrop fade-out and container shrink morph (0.20s)
+            modalBackdrop.style.transition = 'opacity 0.20s ease';
+            modalBackdrop.style.opacity = '0';
+
+            modalContainer.style.transition = 'transform 0.20s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.20s ease';
+            modalContainer.style.transform = `translate3d(${deltaX.toFixed(2)}px, ${deltaY.toFixed(2)}px, 0) scale(${scaleX.toFixed(3)}, ${scaleY.toFixed(3)})`;
+            modalContainer.style.opacity = '0.4';
+
+            setTimeout(() => {
+                isModalOpen = false;
+                document.body.classList.remove('modal-active');
+                modalBackdrop.classList.remove('is-open');
+                modalBackdrop.setAttribute('aria-hidden', 'true');
+                modalBackdrop.style.transition = '';
+                modalBackdrop.style.opacity = '';
+                modalContainer.style.transition = '';
+                modalContainer.style.transform = '';
+                modalContainer.style.opacity = '';
+                isModalAnimating = false;
+            }, 200);
+        } else {
             isModalOpen = false;
             document.body.classList.remove('modal-active');
             modalBackdrop.classList.remove('is-open');
             modalBackdrop.setAttribute('aria-hidden', 'true');
+            modalBackdrop.style.transition = '';
+            modalBackdrop.style.opacity = '';
+            modalContainer.style.transition = '';
+            modalContainer.style.transform = '';
+            modalContainer.style.opacity = '';
+            isModalAnimating = false;
         }
     }
 
@@ -884,7 +967,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const heroCard = document.querySelector('.bento-hero');
     if (heroCard) {
         heroCard.addEventListener('click', (e) => {
             if (!e.target.closest('.bento-btn')) {

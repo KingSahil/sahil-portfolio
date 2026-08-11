@@ -957,11 +957,10 @@ html, body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity;
 }
 
 .modal-backdrop.is-open {
-    opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
@@ -978,12 +977,8 @@ html, body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transform: scale(0.92) translateY(20px);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-backdrop.is-open .modal-container {
-    transform: scale(1) translateY(0);
+    will-change: transform;
+    transform-origin: center center;
 }
 
 .modal-close-btn {
