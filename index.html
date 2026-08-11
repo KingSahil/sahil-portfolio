@@ -36,8 +36,8 @@
                         <img src="https://avatars.githubusercontent.com/u/50039447?v=4" alt="Sahil" class="avatar-img">
                         <span class="status-indicator" title="Available for projects"></span>
                     </div>
-                    <div class="badge-status">
-                        <span class="dot"></span> Available for builds
+                    <div class="hero-expand-badge handwritten-expand">
+                        (click to expand ✦)
                     </div>
                 </div>
                 <div class="hero-content">
@@ -57,29 +57,38 @@
                         <i class="fas fa-file-lines"></i>
                         <span>Resume</span>
                     </a>
-                    <a href="mailto:sahilgupta2150@gmail.com" class="bento-btn btn-secondary">
+                    <a href="mailto:sahilgupta1750@gmail.com" class="bento-btn btn-secondary">
                         <i class="fas fa-paper-plane"></i>
                         <span>Contact</span>
                     </a>
                 </div>
             </article>
 
-            <!-- 2. Featured GitHub Experiments Card with Stats -->
+            <!-- 2. Featured GitHub Experiments Card with Minimal Green Box Grid -->
             <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="bento-card bento-github-card card-github">
-                <div class="github-doodle-tag">(@kingsahil)</div>
-                <div class="github-top-info">
-                    <div class="github-icon-bubble">
-                        <i class="fab fa-github"></i>
+                <div class="github-card-top">
+                    <div class="github-brand">
+                        <div class="github-icon-bubble">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <div class="github-brand-text">
+                            <div class="github-title-row">
+                                <span class="github-title">GitHub</span>
+                                <span class="github-handle handwritten-inline">(@kingsahil)</span>
+                            </div>
+                            <span class="github-sub">My experiments (aka projects)</span>
+                        </div>
                     </div>
-                    <div class="github-text">
-                        <span class="github-title">GitHub</span>
-                        <span class="github-sub">My experiments (aka projects)</span>
+                    
+                    <div class="github-quick-stats">
+                        <span class="stat-chip"><i class="fas fa-star"></i> <span id="gh-stars">40</span></span>
+                        <span class="stat-chip"><i class="fas fa-users"></i> <span id="gh-followers">38</span></span>
+                        <span class="stat-chip"><i class="fas fa-code-branch"></i> <span id="gh-repos">65</span></span>
                     </div>
                 </div>
-                <div class="github-stats-bar">
-                    <div class="stat-item"><span class="stat-label">Stars:</span> <span class="stat-val" id="gh-stars">40</span></div>
-                    <div class="stat-item"><span class="stat-label">Followers:</span> <span class="stat-val" id="gh-followers">38</span></div>
-                    <div class="stat-item"><span class="stat-label">Repos:</span> <span class="stat-val" id="gh-repos">65</span></div>
+
+                <div class="github-minimal-grid" id="github-minimal-grid">
+                    <!-- Populated dynamically with GitHub green contribution boxes -->
                 </div>
             </a>
 
@@ -220,6 +229,190 @@
 
         </div>
     </main>
+
+    <!-- Expanded About Me Modal Overlay -->
+    <div class="modal-backdrop" id="about-modal" aria-hidden="true">
+        <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">
+                <i class="fas fa-xmark"></i>
+            </button>
+            
+            <div class="modal-header">
+                <div class="modal-header-profile">
+                    <img src="https://avatars.githubusercontent.com/u/50039447?v=4" alt="Sahil" class="modal-avatar">
+                    <div class="modal-header-text">
+                        <h2 class="modal-name" id="modal-title">Sahil <span class="accent-text">.</span></h2>
+                        <p class="modal-subtitle">Full-Stack Developer & Automation Builder</p>
+                        <div class="modal-pills">
+                            <span class="modal-pill"><i class="fas fa-location-dot"></i> Amritsar, Punjab, India</span>
+                            <span class="modal-pill pill-status"><span class="dot"></span> Open for Collaborations</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Section 1: Who Am I -->
+                <section class="modal-section">
+                    <h3 class="modal-section-title">
+                        <i class="fas fa-user-astronaut"></i> Who Am I
+                    </h3>
+                    <div class="bio-grid">
+                        <div class="bio-card bio-main">
+                            <p>
+                                Hey there! I'm <strong>Sahil</strong>, a curious full-stack developer dedicated to crafting performant web platforms, intelligent automation workflows, and interactive software.
+                            </p>
+                            <p>
+                                Driven by a passion for continuous learning and problem solving, I spend my days tweaking Linux environments, developing custom GDScript shaders in Godot, building scalable web apps with React, Next.js, and Node.js, and automating real-world tasks.
+                            </p>
+                        </div>
+                        <div class="bio-highlights">
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-code"></i></div>
+                                <div>
+                                    <span class="highlight-title">Full-Stack Craft</span>
+                                    <span class="highlight-desc">React, Next.js, TypeScript, Node.js & Python</span>
+                                </div>
+                            </div>
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-terminal"></i></div>
+                                <div>
+                                    <span class="highlight-title">Linux Lover</span>
+                                    <span class="highlight-desc">Terminal enthusiast, custom shell scripting & setups</span>
+                                </div>
+                            </div>
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i class="fas fa-gamepad"></i></div>
+                                <div>
+                                    <span class="highlight-title">Game & Shader Dev</span>
+                                    <span class="highlight-desc">Godot Engine 4.x, GDScript & fluid shaders</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Featured Projects -->
+                <section class="modal-section">
+                    <h3 class="modal-section-title">
+                        <i class="fas fa-cubes"></i> Featured Projects
+                    </h3>
+                    <div class="modal-projects-grid">
+                        <div class="modal-project-card">
+                            <div class="project-header">
+                                <span class="project-tag">Full-Stack / Automation</span>
+                                <a href="https://github.com/KingSahil/GNDU-Attendance-System" target="_blank" rel="noopener noreferrer" class="project-link-icon" title="View Code">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </div>
+                            <h4 class="project-title">GNDU Attendance System</h4>
+                            <p class="project-desc">Automated attendance management and parsing system built to streamline student tracking and record management at GNDU.</p>
+                            <div class="project-tech">
+                                <span>JavaScript</span>
+                                <span>Node.js</span>
+                                <span>HTML/CSS</span>
+                            </div>
+                        </div>
+
+                        <div class="modal-project-card">
+                            <div class="project-header">
+                                <span class="project-tag">Game Engine / Simulation</span>
+                                <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="project-link-icon" title="View Code">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </div>
+                            <h4 class="project-title">The Science Lab</h4>
+                            <p class="project-desc">Interactive 2D/3D educational science simulation game developed in Godot Engine with custom physics and experiments.</p>
+                            <div class="project-tech">
+                                <span>Godot Engine</span>
+                                <span>GDScript</span>
+                                <span>Physics</span>
+                            </div>
+                        </div>
+
+                        <div class="modal-project-card">
+                            <div class="project-header">
+                                <span class="project-tag">Graphics & Shaders</span>
+                                <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="project-link-icon" title="View Code">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </div>
+                            <h4 class="project-title">Godot 4.4 Liquid Shader</h4>
+                            <p class="project-desc">Real-time procedural liquid shader with dynamic wave physics, specular reflections, and volumetric depth rendering in Godot 4.4.</p>
+                            <div class="project-tech">
+                                <span>Godot 4.4</span>
+                                <span>GDShader</span>
+                                <span>GLSL</span>
+                            </div>
+                        </div>
+
+                        <div class="modal-project-card">
+                            <div class="project-header">
+                                <span class="project-tag">Web Application</span>
+                                <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="project-link-icon" title="View Code">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </div>
+                            <h4 class="project-title">Gamified Education Platform</h4>
+                            <p class="project-desc">Interactive web platform leveraging gamification mechanics, quiz engines, and progress tracking to make learning engaging.</p>
+                            <div class="project-tech">
+                                <span>React</span>
+                                <span>JavaScript</span>
+                                <span>Tailwind / CSS</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Hackathons & Achievements -->
+                <section class="modal-section">
+                    <h3 class="modal-section-title">
+                        <i class="fas fa-trophy"></i> Hackathons & Achievements
+                    </h3>
+                    <div class="modal-hackathons-list">
+                        <div class="hackathon-card">
+                            <div class="hackathon-badge"><i class="fas fa-medal"></i> Campus Automation Hackathon</div>
+                            <div class="hackathon-details">
+                                <h4 class="hackathon-title">Automated Attendance & Management System</h4>
+                                <span class="hackathon-meta"><i class="far fa-calendar-alt"></i> Built in 36 Hours</span>
+                                <p class="hackathon-desc">Designed and prototyped an automated attendance parsing engine to eliminate manual data entry and streamline student portal analytics.</p>
+                                <div class="hackathon-tags">
+                                    <span>Automation</span>
+                                    <span>JavaScript</span>
+                                    <span>Web Engine</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hackathon-card">
+                            <div class="hackathon-badge badge-cyan"><i class="fas fa-star"></i> Godot Game & Shader Jam</div>
+                            <div class="hackathon-details">
+                                <h4 class="hackathon-title">Procedural Physics & Liquid Shader Challenge</h4>
+                                <span class="hackathon-meta"><i class="far fa-calendar-alt"></i> 48-Hour Hackathon</span>
+                                <p class="hackathon-desc">Engineered dynamic liquid simulation shaders and interactive 2D physics puzzles using Godot 4.x & GDShader math.</p>
+                                <div class="hackathon-tags">
+                                    <span>Godot 4</span>
+                                    <span>GDScript</span>
+                                    <span>Shaders</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="modal-footer">
+                <a href="https://github.com/KingSahil" target="_blank" rel="noopener noreferrer" class="bento-btn btn-primary">
+                    <i class="fab fa-github"></i>
+                    <span>Explore Repos (@KingSahil)</span>
+                </a>
+                <a href="mailto:sahilgupta1750@gmail.com" class="bento-btn btn-secondary">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Get In Touch</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script src="assets/js/script.js"></script>
 </body>
