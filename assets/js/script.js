@@ -959,12 +959,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('github-minimal-grid');
         if (!container) return;
 
-        // Real live contribution data vector for @KingSahil (799 contributions)
-        const realLevels = [
-            1, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 2, 4, 0, 3, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 1, 2, 0, 0, 1, 2, 0, 2, 1, 3, 0,
-            2, 4, 4, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 1, 0, 4, 1, 3, 0, 4, 0, 0, 0, 1, 1,
-            0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 2, 3, 0, 0, 1, 1, 3, 0, 1, 2, 3, 4
+        // Chronologically sorted live contribution data vector for @KingSahil (799 contributions, past 112 days)
+        const realChronologicalLevels = [
+            0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 0, 2, 2, 0, 1, 0, 0, 0, 2, 1, 2, 2, 1, 1, 0, 0,
+            0, 0, 0, 0, 2, 1, 2, 0, 3, 0, 2, 1, 1, 0, 1, 0, 1, 3, 0, 2, 0, 0, 0, 2, 0, 2, 0, 1,
+            1, 1, 0, 0, 1, 0, 1, 3, 1, 2, 1, 1, 1, 1, 4, 1, 1, 1, 0, 2, 0, 1, 0, 3, 3, 1, 3, 2
         ];
 
         function renderBoxes(levels) {
@@ -975,17 +975,26 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = html;
         }
 
-        // Render initial real baseline immediately
-        renderBoxes(realLevels);
+        // Render accurate chronological baseline immediately
+        renderBoxes(realChronologicalLevels);
 
-        // Fetch live real-time contributions from GitHub profile
+        // Fetch live real-time contributions from GitHub profile & sort chronologically by date
         try {
             const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://github.com/users/KingSahil/contributions'));
             if (res.ok) {
-                const text = await res.text();
-                const matches = text.match(/data-level="([0-4])"/g);
-                if (matches && matches.length >= 112) {
-                    const fetchedLevels = matches.slice(-112).map(m => parseInt(m.replace(/\D/g, ''), 10));
+                const htmlText = await res.text();
+                const regex = /data-date="([^"]+)"[^>]*data-level="([0-4])"/g;
+                let match;
+                const items = [];
+
+                while ((match = regex.exec(htmlText)) !== null) {
+                    items.push({ date: match[1], level: parseInt(match[2], 10) });
+                }
+
+                if (items.length >= 112) {
+                    // Chronological sort by YYYY-MM-DD
+                    items.sort((a, b) => a.date.localeCompare(b.date));
+                    const fetchedLevels = items.slice(-112).map(item => item.level);
                     renderBoxes(fetchedLevels);
                 }
             }
@@ -994,4 +1003,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     fetchRealGitHubContributions();
+
+    // Floating Tech Stack Tooltip Cursor Tracker
+    const techTooltip = document.getElementById('tech-tooltip');
+    const techCard = document.querySelector('.bento-tech-marquee');
+
+    if (techCard && techTooltip) {
+        // Strip native title attributes to eliminate slow browser default tooltip delays
+        const techIcons = techCard.querySelectorAll('i[title], [data-tech-name]');
+        techIcons.forEach(icon => {
+            if (icon.hasAttribute('title')) {
+                icon.setAttribute('data-tech-name', icon.getAttribute('title'));
+                icon.removeAttribute('title');
+            }
+        });
+
+        techCard.addEventListener('mousemove', (e) => {
+            const icon = e.target.closest('[data-tech-name]');
+            if (icon) {
+                const name = icon.getAttribute('data-tech-name');
+                techTooltip.textContent = name;
+                techTooltip.classList.add('is-visible');
+
+                const ttWidth = techTooltip.offsetWidth || 100;
+                let posX = e.clientX + 16;
+                let posY = e.clientY - 38;
+
+                if (posX + ttWidth + 15 > window.innerWidth) {
+                    posX = e.clientX - ttWidth - 12;
+                }
+                if (posY < 10) {
+                    posY = e.clientY + 22;
+                }
+
+                techTooltip.style.left = `${posX}px`;
+                techTooltip.style.top = `${posY}px`;
+            } else {
+                techTooltip.classList.remove('is-visible');
+            }
+        }, { passive: true });
+
+        techCard.addEventListener('mouseleave', () => {
+            techTooltip.classList.remove('is-visible');
+        });
+    }
 });
