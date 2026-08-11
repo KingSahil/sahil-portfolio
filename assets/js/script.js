@@ -229,6 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.lastFrameX = this.x;
                     this.lastFrameY = this.y;
 
+                    // Directional Shake Marquee Acceleration:
+                    // Shaking LEFT accelerates the Left-moving track, shaking RIGHT accelerates the Right-moving track
+                    if (this.card.classList.contains('bento-tech-marquee')) {
+                        const currentVx = this.isHeld ? (this.instVx || this.vx) : this.vx;
+                        if (currentVx < -0.2) {
+                            const boost = Math.min(8.5, Math.abs(currentVx) * 0.75);
+                            targetSpeedTop = baseSpeed + boost;
+                        } else if (currentVx > 0.2) {
+                            const boost = Math.min(8.5, Math.abs(currentVx) * 0.75);
+                            targetSpeedBottom = baseSpeed + boost;
+                        }
+                    }
+
                     // Dynamic rotation tilt along drag velocity vector
                     this.rz += (this.vx * 0.4 - this.rz) * 0.25;
                     this.isDirty = true;
@@ -369,6 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dragHold(clientX, clientY) {
                 if (!this.isHeld) return;
+                const instVx = clientX - (this.lastMouseX !== undefined ? this.lastMouseX : clientX);
+                this.instVx = instVx;
                 const dx = clientX - this.dragStartX;
                 const dy = clientY - this.dragStartY;
                 const stepDist = Math.sqrt((clientX - this.lastMouseX) ** 2 + (clientY - this.lastMouseY) ** 2);
