@@ -49,6 +49,121 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
     }
 
+    // Real-Time Mouse/Pointer Tracking for Spatial Collision
+    let currentMouseX = -1000;
+    let currentMouseY = -1000;
+    let isMouseActive = false;
+
+    window.addEventListener('pointermove', (e) => {
+        currentMouseX = e.clientX;
+        currentMouseY = e.clientY;
+        isMouseActive = true;
+    }, { passive: true });
+
+    window.addEventListener('pointerleave', () => {
+        isMouseActive = false;
+        currentMouseX = -1000;
+        currentMouseY = -1000;
+    }, { passive: true });
+
+    // Sanitize tech stack icons: convert title to data-tech-name to suppress standard delayed browser tooltips
+    const techCard = document.querySelector('.bento-tech-marquee');
+    const techTooltip = document.getElementById('tech-tooltip');
+    const techIcons = Array.from(document.querySelectorAll('.marquee-group i'));
+    let activeTechIcon = null;
+
+    techIcons.forEach((icon) => {
+        const titleName = icon.getAttribute('title');
+        if (titleName) {
+            icon.setAttribute('data-tech-name', titleName);
+            icon.removeAttribute('title');
+        }
+    });
+
+    function isCursorInsideElement(x, y, el) {
+        if (!el) return false;
+        const r = el.getBoundingClientRect();
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    }
+
+    function updateRealtimeTechTooltip() {
+        if (!techTooltip || !techCard) return;
+
+        let matchedIcon = null;
+        let matchedName = '';
+        let matchedRect = null;
+
+        // Strictly check if cursor is inside tech stack card boundaries
+        const isInsideTechCard = isMouseActive && isCursorInsideElement(currentMouseX, currentMouseY, techCard);
+
+        if (!isInsideTechCard) {
+            // Reset marquee speed control when cursor is outside tech stack card
+            targetSpeedTop = baseSpeed;
+            targetSpeedBottom = baseSpeed;
+
+            if (activeTechIcon) {
+                activeTechIcon.classList.remove('tech-active');
+                activeTechIcon = null;
+            }
+            techTooltip.classList.remove('is-visible');
+            return;
+        }
+
+        const techCardRect = techCard.getBoundingClientRect();
+
+        for (let i = 0; i < techIcons.length; i++) {
+            const icon = techIcons[i];
+            const rect = icon.getBoundingClientRect();
+
+            // Skip icons outside the tech card bounds
+            if (
+                rect.right < techCardRect.left ||
+                rect.left > techCardRect.right ||
+                rect.bottom < techCardRect.top ||
+                rect.top > techCardRect.bottom
+            ) {
+                continue;
+            }
+
+            // 4px hit margin around icon bounding box
+            const hitMargin = 4;
+            if (
+                currentMouseX >= rect.left - hitMargin &&
+                currentMouseX <= rect.right + hitMargin &&
+                currentMouseY >= rect.top - hitMargin &&
+                currentMouseY <= rect.bottom + hitMargin
+            ) {
+                matchedIcon = icon;
+                matchedName = icon.getAttribute('data-tech-name') || '';
+                matchedRect = rect;
+                break;
+            }
+        }
+
+        if (matchedIcon && matchedName) {
+            if (activeTechIcon !== matchedIcon) {
+                if (activeTechIcon) activeTechIcon.classList.remove('tech-active');
+                activeTechIcon = matchedIcon;
+                activeTechIcon.classList.add('tech-active');
+            }
+
+            techTooltip.textContent = matchedName;
+
+            const clampedX = Math.max(techCardRect.left + 30, Math.min(techCardRect.right - 30, currentMouseX));
+            const targetY = Math.max(techCardRect.top - 10, matchedRect.top - 6);
+
+            techTooltip.style.left = `${clampedX}px`;
+            techTooltip.style.top = `${targetY}px`;
+            techTooltip.classList.add('is-visible');
+        } else {
+            if (activeTechIcon) {
+                activeTechIcon.classList.remove('tech-active');
+                activeTechIcon = null;
+            }
+            techTooltip.classList.remove('is-visible');
+        }
+    }
+
     // ==========================================================================
     // HIGH-PERFORMANCE CONTINUOUS INFINITE MARQUEE ENGINE (ZERO JERK, ZERO JUMP)
     // ==========================================================================
@@ -123,6 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             trackBottom.style.transform = `translate3d(${posBottom}px, 0, 0)`;
         }
+
+        // Real-Time Spatial Collision Popup Check for Tech Stack Icons
+        updateRealtimeTechTooltip();
 
         requestAnimationFrame(stepMarqueeLoop);
     }
@@ -1100,48 +1218,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     fetchRealGitHubContributions();
-
-    // Floating Tech Stack Tooltip Cursor Tracker
-    const techTooltip = document.getElementById('tech-tooltip');
-    const techCard = document.querySelector('.bento-tech-marquee');
-
-    if (techCard && techTooltip) {
-        // Strip native title attributes to eliminate slow browser default tooltip delays
-        const techIcons = techCard.querySelectorAll('i[title], [data-tech-name]');
-        techIcons.forEach(icon => {
-            if (icon.hasAttribute('title')) {
-                icon.setAttribute('data-tech-name', icon.getAttribute('title'));
-                icon.removeAttribute('title');
-            }
-        });
-
-        techCard.addEventListener('mousemove', (e) => {
-            const icon = e.target.closest('[data-tech-name]');
-            if (icon) {
-                const name = icon.getAttribute('data-tech-name');
-                techTooltip.textContent = name;
-                techTooltip.classList.add('is-visible');
-
-                const ttWidth = techTooltip.offsetWidth || 100;
-                let posX = e.clientX + 16;
-                let posY = e.clientY - 38;
-
-                if (posX + ttWidth + 15 > window.innerWidth) {
-                    posX = e.clientX - ttWidth - 12;
-                }
-                if (posY < 10) {
-                    posY = e.clientY + 22;
-                }
-
-                techTooltip.style.left = `${posX}px`;
-                techTooltip.style.top = `${posY}px`;
-            } else {
-                techTooltip.classList.remove('is-visible');
-            }
-        }, { passive: true });
-
-        techCard.addEventListener('mouseleave', () => {
-            techTooltip.classList.remove('is-visible');
-        });
-    }
 });
