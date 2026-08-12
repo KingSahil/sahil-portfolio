@@ -20,28 +20,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isModalOpen = false;
 
-    // 1. Custom Cursor Logic (Desktop Only with GPU Translate3d Acceleration)
+    // 1. Custom Cursor Logic (Desktop Only with GPU 1-to-1 Hardware Acceleration)
     const cursor = document.getElementById('custom-cursor');
 
     if (cursor && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        let cursorX = 0;
-        let cursorY = 0;
-        let cursorScheduled = false;
+        let cursorX = -100;
+        let cursorY = -100;
+        let isDraggingScrollbar = false;
 
-        document.addEventListener('mousemove', (e) => {
+        function checkScrollbarHover(e) {
+            if (!isModalOpen) return false;
+            const modalBody = document.querySelector('.modal-body');
+            if (!modalBody) return false;
+
+            // Check if vertical scrollbar is active
+            if (modalBody.scrollHeight > modalBody.clientHeight) {
+                const rect = modalBody.getBoundingClientRect();
+                const scrollbarStartX = rect.left + modalBody.clientWidth;
+                if (e.clientX >= scrollbarStartX - 4 && e.clientX <= rect.right + 6 && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateCursorPos(e) {
             cursorX = e.clientX;
             cursorY = e.clientY;
-            if (!cursorScheduled) {
-                cursorScheduled = true;
-                requestAnimationFrame(() => {
-                    cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
-                    cursorScheduled = false;
-                });
+            cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
+
+            const isOverScrollbar = checkScrollbarHover(e);
+            if (isOverScrollbar || isDraggingScrollbar) {
+                cursor.classList.add('is-hidden');
+            } else {
+                cursor.classList.remove('is-hidden');
             }
-        }, { passive: true });
+        }
+
+        window.addEventListener('pointerdown', (e) => {
+            if (checkScrollbarHover(e)) {
+                isDraggingScrollbar = true;
+                cursor.classList.add('is-hidden');
+            }
+        }, { passive: true, capture: true });
+
+        window.addEventListener('pointerup', () => {
+            isDraggingScrollbar = false;
+        }, { passive: true, capture: true });
+
+        window.addEventListener('pointercancel', () => {
+            isDraggingScrollbar = false;
+        }, { passive: true, capture: true });
+
+        // Instant zero-latency hardware tracking across window, modal, and scrollbars
+        window.addEventListener('pointermove', updateCursorPos, { passive: true, capture: true });
+        window.addEventListener('mousemove', updateCursorPos, { passive: true, capture: true });
+        window.addEventListener('dragover', updateCursorPos, { passive: true, capture: true });
 
         document.addEventListener('mouseover', (e) => {
-            if (e.target && e.target.closest && e.target.closest('a, button, .bento-card, .skill-pill, .modal-close-btn, .modal-project-card, .hackathon-card')) {
+            if (e.target && e.target.closest && e.target.closest('a, button, .bento-card, .skill-pill, .modal-close-btn, .modal-project-card, .hackathon-card, .project-link-icon')) {
                 cursor.classList.add('hover');
             } else {
                 cursor.classList.remove('hover');
@@ -202,6 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', measureMarqueeWidths, { passive: true });
 
     function stepMarqueeLoop() {
+        if (isModalOpen) {
+            requestAnimationFrame(stepMarqueeLoop);
+            return;
+        }
+
         // Fallback width check
         if (halfWidthTop === 0 && trackTop) {
             const g = trackTop.querySelector('.marquee-group');
@@ -1024,9 +1066,13 @@ document.addEventListener('DOMContentLoaded', () => {
             modalContainer.style.opacity = '1';
 
             setTimeout(() => {
+                const bentoViewport = document.querySelector('.bento-viewport');
+                if (bentoViewport) bentoViewport.classList.add('is-paused');
                 isModalAnimating = false;
             }, 240);
         } else {
+            const bentoViewport = document.querySelector('.bento-viewport');
+            if (bentoViewport) bentoViewport.classList.add('is-paused');
             modalBackdrop.style.opacity = '1';
             isModalAnimating = false;
         }
@@ -1035,6 +1081,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeAboutModal() {
         if (!modalBackdrop || !modalContainer || isModalAnimating) return;
         isModalAnimating = true;
+
+        const bentoViewport = document.querySelector('.bento-viewport');
+        if (bentoViewport) bentoViewport.classList.remove('is-paused');
 
         if (heroCard) {
             const heroRect = heroCard.getBoundingClientRect();

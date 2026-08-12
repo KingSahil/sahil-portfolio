@@ -7,11 +7,11 @@
 /* --------------------------------------------------------------------------
    1. CSS Reset & Variables
    -------------------------------------------------------------------------- */
-* {
+*, *::before, *::after, ::-webkit-scrollbar, ::-webkit-scrollbar-thumb, ::-webkit-scrollbar-track {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    cursor: none; /* Custom cursor */
+    cursor: none !important; /* Custom cursor everywhere */
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -102,8 +102,13 @@ html, body {
     pointer-events: none;
     z-index: 100000;
     will-change: transform;
-    transition: width 0.15s ease, height 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, margin 0.15s ease;
+    transition: width 0.15s ease, height 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, margin 0.15s ease, opacity 0.15s ease, visibility 0.15s ease;
     box-shadow: 0 0 12px var(--accent-red);
+}
+
+.custom-cursor.is-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
 
 .custom-cursor.hover {
@@ -1001,15 +1006,46 @@ html, body {
     width: 100%;
     max-width: 860px;
     max-height: 88vh;
-    background: linear-gradient(145deg, rgba(14, 20, 33, 0.95) 0%, rgba(8, 12, 21, 0.98) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: var(--bg-main);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-lg);
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     will-change: transform;
     transform-origin: center center;
+}
+
+/* Home Page Matching Red & Cyan/Blue Background Radial Glows */
+.modal-container::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-red) 0%, rgba(255, 0, 51, 0) 70%);
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+}
+
+.modal-container::after {
+    content: '';
+    position: absolute;
+    bottom: -120px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-cyan) 0%, rgba(0, 229, 255, 0) 70%);
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
 }
 
 .modal-close-btn {
@@ -1039,6 +1075,8 @@ html, body {
 }
 
 .modal-header {
+    position: relative;
+    z-index: 1;
     padding: 1.75rem 2rem 1.25rem 2rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
@@ -1104,6 +1142,8 @@ html, body {
 }
 
 .modal-body {
+    position: relative;
+    z-index: 1;
     padding: 1.75rem 2rem;
     overflow-y: auto;
     display: flex;
@@ -1237,6 +1277,8 @@ html, body {
     flex-direction: column;
     gap: 0.6rem;
     transition: all 0.25s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
 .modal-project-card:hover {
@@ -1317,6 +1359,8 @@ html, body {
     gap: 1.25rem;
     align-items: flex-start;
     transition: border-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
 .hackathon-card:hover {
@@ -1425,11 +1469,17 @@ html, body {
    -------------------------------------------------------------------------- */
 body.modal-active {
     overflow: hidden !important;
-    touch-action: none !important;
 }
 
-body.modal-active .bento-viewport {
+.bento-viewport {
+    transition: filter 0.35s ease, transform 0.35s ease, opacity 0.35s ease;
+}
+
+.bento-viewport.is-paused {
     pointer-events: none !important;
+    filter: blur(10px) brightness(0.45) saturate(0.85);
+    transform: scale(0.96);
+    opacity: 0.85;
 }
 
 body.modal-active .bento-card {
